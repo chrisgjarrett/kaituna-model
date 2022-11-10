@@ -1,4 +1,4 @@
 #!/bin/bash
-app="main"
+app="kaituna.predictor"
 docker build -t ${app} .
-docker run -d -p 56733:80 --name=${app} -v "$PWD" ${app}
+docker run -d -p 8080 --name=${app} -v "$PWD" ${app}

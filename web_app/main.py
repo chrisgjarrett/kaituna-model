@@ -11,6 +11,7 @@ import sys
 import os
 
 # web frameworks
+from flask import Flask
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, HTMLResponse, RedirectResponse
 import uvicorn
@@ -45,10 +46,11 @@ def get_features():
 
     return X_daily
 
-app = Starlette()
+#app = Starlette()
+app = Flask(__name__)
 
 @app.route("/predict-flow", methods=["GET"])
-def predict_flow(request):
+def predict_flow():
 
     # Get raw features
     X = get_features()
@@ -60,7 +62,7 @@ def predict_flow(request):
     model = tf.keras.models.load_model('model/saved_model.h5')
     y_preds = model.predict(X_preprocessed)
 
-    return HTMLResponse("""
+    return """
         <html>
             <body>
                 <p> %s: <b> %s </b> </p>
@@ -71,27 +73,27 @@ def predict_flow(request):
         </html>
         """ % (date.today(), y_preds[0,0],
                date.today() + timedelta(days=1), y_preds[0,1],
-               date.today() + timedelta(days=2), y_preds[0,2]))
+               date.today() + timedelta(days=2), y_preds[0,2])
 
 
 @app.route("/")
-def form(request):
-    return HTMLResponse(
-        """
+def form():
+    return """
         <h1> Kaituna Flow Prediction </h1>
         <p> Let's predict the flow </p>
         <br>
         <form action = "/predict-flow" method="get">
             <button name="btn">Refresh</button>
         </form>
-        """)
+        """
 
 
-@app.route("/form")
+"""@app.route("/form")
 def redirect_to_homepage(request):
     return RedirectResponse("/")
-
+"""
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8008))
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    #port = int(os.environ.get("PORT", 8008))
+    #uvicorn.run(app)
+    app.run(host='0.0.0.0')

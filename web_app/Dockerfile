@@ -9,4 +9,4 @@ COPY data_preprocessing /kaituna-predictor/data_preprocessing
 COPY web_scraper /kaituna-predictor/web_scraper
 COPY app.py /kaituna-predictor
 ENV FLASK_APP=app.py
-CMD ["python3", "-m", "flask","run", "--host=0.0.0.0"]
+CMD ["flask","run", "--host=0.0.0.0"]

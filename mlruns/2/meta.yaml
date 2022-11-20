@@ -1,0 +1,4 @@
+artifact_location: file:///Users/chrisjarrett/Documents/Personal/kaituna-flow-predictions/mlruns/2
+experiment_id: '2'
+lifecycle_stage: active
+name: Exploring addition of current day features, rather than lags

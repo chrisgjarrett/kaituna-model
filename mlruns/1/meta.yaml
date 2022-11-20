@@ -1,0 +1,4 @@
+artifact_location: file:///Users/chrisjarrett/Documents/Personal/kaituna-flow-predictions/mlruns/1
+experiment_id: '1'
+lifecycle_stage: active
+name: Initial experiment

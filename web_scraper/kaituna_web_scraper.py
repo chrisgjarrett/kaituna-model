@@ -17,8 +17,6 @@ def collate_kaituna_data(start_date, end_date):
     flow_df = flow_df_all[["TimeStamp", "Value"]]
     flow_df = flow_df.rename(columns={'Value': 'FlowRate'})
     flow_df['TimeStamp'] = pd.to_datetime(flow_df['TimeStamp'])
-
-    print(flow_df.shape)
     print(flow_df.head())
 
     # Get Lake levels
@@ -28,7 +26,6 @@ def collate_kaituna_data(start_date, end_date):
     lake_level_df = lake_level_df_all[["TimeStamp", "Value"]]
     lake_level_df = lake_level_df.rename(columns={'Value': 'LakeLevel'})
     lake_level_df['TimeStamp'] = pd.to_datetime(lake_level_df['TimeStamp'])
-    print(lake_level_df.shape)
     print(lake_level_df.head())
 
     # Get gate levels
@@ -57,20 +54,16 @@ def collate_kaituna_data(start_date, end_date):
     gate_levels_df_temp = pd.merge(gate_1_df, gate_2_df, on='TimeStamp')
     gate_levels_df = pd.merge(gate_levels_df_temp, gate_3_df, on='TimeStamp', how='left')
     gate_levels_df['TimeStamp'] = pd.to_datetime(gate_levels_df['TimeStamp'])
-
-    print(gate_levels_df.describe())
     print(gate_levels_df.head())
 
     # Get rainfall at Lake Rotoiti
     rainfall_url = 'https://envdata.boprc.govt.nz/Data/DatasetGrid?dataset=47928&sort=TimeStamp-desc&page=1&group=&filter=&interval=Custom&timezone=720&date={}&endDate={}&calendar=1&alldata=false'.format(
         start_date, end_date)
-
     rainfall_df_all = get_df_from_json(rainfall_url)
     rainfall_df = rainfall_df_all[["TimeStamp", "Value"]]
     rainfall_df = rainfall_df.rename(columns={'Value': 'Rainfall'})
     rainfall_df['TimeStamp'] = pd.to_datetime(rainfall_df['TimeStamp'])
     print(rainfall_df.head())
-    print(rainfall_df.shape)
 
     # Merge datasets into one dataframe
     df_temp = pd.merge(lake_level_df, flow_df, on='TimeStamp', how='left')
@@ -87,4 +80,4 @@ def collate_kaituna_data(start_date, end_date):
     # Sort by timestamp descending
     df_river_data = df_river_data.sort_values('TimeStamp')
 
-    print(df_river_data)
+    return df_river_data

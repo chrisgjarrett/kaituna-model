@@ -17,7 +17,7 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from helpers.transfomers import make_multistep_target
 from helpers import aggregate_hourly_data
 from preprocessing import feature_generator
-from model_helpers.model_definition import create_model
+from model_helpers.model_definition import create_ann, create_rnn, LSTM_reset_callback
 
 # Configure logging
 logging.basicConfig(level=logging.WARN)
@@ -71,8 +71,9 @@ if __name__ == "__main__":
     learning_rate = 0.01
     patience = 100
     min_delta = 0.0001
-
-    experiment_name = 'Exploring addition of current day features, rather than lags'
+    batch_size = 1 # Play with this
+    
+    experiment_name = 'Trying a stateless RNN'
     mlflow.set_experiment(experiment_name)
     
     # Start experiment
@@ -87,7 +88,7 @@ if __name__ == "__main__":
 
         #Fit model
         wrapped_model = KerasRegressor(
-            create_model,
+            create_ann,
             input_size=X_train_df.shape[1],
             output_size=y_train_df.shape[1],
             learning_rate=learning_rate,
@@ -95,12 +96,26 @@ if __name__ == "__main__":
             callbacks=[early_stopping],
             #verbose=verbose
             )
+        
+        state_reset_callback = LSTM_reset_callback()
+        wrapped_model = KerasRegressor(
+            create_rnn,
+            batch_size=batch_size,
+            time_steps=1,
+            n_features=X_train_df.shape[1],
+            output_size=y_train_df.shape[1],
+            epochs=n_epochs,
+            callbacks=[early_stopping, state_reset_callback()], #state_reset_callback
+        )
+
+        # reshape X data
+        X_train_reshaped = np.reshape(np.array(X_train_df), (X_train_df.shape[0], 1, X_train_df.shape[1]))
 
         # Cross validation
         n_splits=5
         tscv = TimeSeriesSplit(gap=0, max_train_size=None, n_splits=n_splits)
         scores = cross_val_score(wrapped_model,
-                                X_train_df,
+                                X_train_reshaped,
                                 y_train_df,
                                 cv=tscv,
                                 scoring='neg_mean_squared_error',
@@ -117,7 +132,8 @@ if __name__ == "__main__":
         mlflow.log_param("learning_rate", learning_rate)
         mlflow.log_param("early_stopping_patience", patience)
         mlflow.log_param("early_stopping_min_delta", min_delta)
-
+        mlflow.log_param('time_steps',1)
+        mlflow.log_param('stateful', False)
         # Save model and data set
         mlflow.sklearn.log_model(
         sk_model=wrapped_model,

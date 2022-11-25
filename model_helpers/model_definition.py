@@ -2,7 +2,7 @@ import tensorflow as tf
 import keras
 from keras import layers
 
-def create_model(
+def create_ann(
     input_size,
     output_size,
     learning_rate,
@@ -22,3 +22,23 @@ def create_model(
     )
 
     return model
+
+def create_rnn(batch_size, time_steps, n_features, output_size, learning_rate=0.01):
+
+    model = keras.Sequential([
+        layers.LSTM(units=100, activation='relu', batch_input_shape=(batch_size, time_steps, n_features), stateful=True,
+        ), #todo make this not a magic number
+        layers.Dense(units=output_size),
+        ])
+
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(epsilon=learning_rate),
+        loss='mean_squared_error',
+    )
+
+    return model
+
+    
+class LSTM_reset_callback(tf.keras.callbacks.Callback):
+   def on_epoch_end(self, epoch, logs=None):
+        lstm_layer.reset_states()

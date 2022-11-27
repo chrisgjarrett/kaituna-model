@@ -53,7 +53,7 @@ def feature_generator(X_input, gate_resolution_level, days_to_predict, target_va
     # Bundle preprocessing for data.
     lag_generator = ColumnTransformer(
         transformers=[
-            ("target_lags", make_lags_transformer(n_target_lags), [target_variable]),
+            #("target_lags", make_lags_transformer(n_target_lags), [target_variable]),
             #("rainfall_lags", make_lags_transformer(n_rainfall_lags), ["Rainfall"]),
             #("lakelevel_lags", make_lags_transformer(n_lake_level_lags), ["LakeLevel"]),
             ("rainfall_leads", make_leads_transformer(n_rainfall_leads), ["Rainfall"]),
@@ -62,7 +62,7 @@ def feature_generator(X_input, gate_resolution_level, days_to_predict, target_va
     )
 
     lead_lag_columns = [
-        "Target_lag",
+        #"Target_lag",
         #"Rainfall_lag",
         #"LakeLevel_lag",
         "Rainfall_lead_1",
@@ -72,14 +72,14 @@ def feature_generator(X_input, gate_resolution_level, days_to_predict, target_va
 
 
     # Select data for model fitting
-    X_cols_of_interest = X[["Rainfall", target_variable]]
+    X_cols_of_interest = X[["Rainfall"]]
 
     # Create lags
-    X_lags = pd.DataFrame(lag_generator.fit_transform(X_cols_of_interest),
+    X_lead_lags = pd.DataFrame(lag_generator.fit_transform(X_cols_of_interest),
                         index = X.index,
                         columns=lead_lag_columns)
     
-    X_features = pd.concat([X_lags, X[["Rainfall", "LakeLevel", "IsWeekend"]]], axis=1)
+    X_features = pd.concat([X_lead_lags, X[[target_variable, "Rainfall", "LakeLevel", "IsWeekend"]]], axis=1)
     
     # Drop nan
     X_features = X_features.dropna()
@@ -92,9 +92,10 @@ def feature_generator(X_input, gate_resolution_level, days_to_predict, target_va
     ])
 
     # Bundle preprocessing for all data
+    columns_to_scale = X_features.columns[X_features.columns != 'IsWeekend']
     preprocessor = ColumnTransformer(
         transformers=[
-            ('num', standardiser_pipeline, lead_lag_columns)
+            ('num', standardiser_pipeline, columns_to_scale)
         ], 
         remainder = 'passthrough')
 

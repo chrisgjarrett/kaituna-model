@@ -17,7 +17,7 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from helpers.transfomers import make_multistep_target
 from helpers import aggregate_hourly_data
 from preprocessing import feature_generator
-from model_helpers.model_definition import create_ann, create_rnn, LSTM_reset_callback
+from model_files.model_definition import create_ann, create_rnn, LSTM_reset_callback
 
 # Configure logging
 logging.basicConfig(level=logging.WARN)
@@ -27,6 +27,8 @@ DAYS_TO_PREDICT = 3
 TARGET_VARIABLE = "AverageGate"
 GATE_RESOLUTION_LEVEL = 100
 TRAINING_DATA_PATH = "datasets/training_data_artifact.csv"
+
+TRAIN_FINAL_MODEL = True
 
 # Load data
 if __name__ == "__main__":
@@ -64,53 +66,60 @@ if __name__ == "__main__":
     training_data_df.to_csv(TRAINING_DATA_PATH)
     
     # Split into training and validation
-    #X_train_df, X_valid_df, y_train, y_valid = train_test_split(X, y, test_size=0.50, shuffle=False)
 
     # Construct model
-    n_epochs = 2000
+    n_epochs = 5#2000
     learning_rate = 0.01
     patience = 100
-    min_delta = 0.0001
+    min_delta = 100
     batch_size = 1 # Play with this
     
+       
+    early_stopping = EarlyStopping(
+        min_delta=min_delta, # minimium amount of change to count as an improvement
+        patience=patience, # how many epochs to wait before stopping
+        restore_best_weights=True,
+        monitor='loss'
+    )
+
+    #Fit model
+    wrapped_model = KerasRegressor(
+        create_ann,
+        input_size=X_train_df.shape[1],
+        output_size=y_train_df.shape[1],
+        learning_rate=learning_rate,
+        epochs=n_epochs,
+        callbacks=[early_stopping],
+        #verbose=verbose
+        )
+    
+    state_reset_callback = LSTM_reset_callback()
+    wrapped_model = KerasRegressor(
+        create_rnn,
+        batch_size=batch_size,
+        time_steps=1,
+        n_features=X_train_df.shape[1],
+        output_size=y_train_df.shape[1],
+        epochs=n_epochs,
+        callbacks=[early_stopping], #state_reset_callback
+    )
+
+    # Reshape for RNN
+    X_train_reshaped = np.reshape(np.array(X_train_df), (X_train_df.shape[0], batch_size, X_train_df.shape[1]))
+
+    if (TRAIN_FINAL_MODEL == True):
+
+        final_model = wrapped_model.fit(X_train_reshaped, y_train_df)
+        pk.dump(final_model, open("model_files/model.pkl","wb"))
+
+        exit()
+
     experiment_name = 'Trying a stateless RNN'
     mlflow.set_experiment(experiment_name)
     
     # Start experiment
     with mlflow.start_run():    
-        
-        early_stopping = EarlyStopping(
-            min_delta=min_delta, # minimium amount of change to count as an improvement
-            patience=patience, # how many epochs to wait before stopping
-            restore_best_weights=True,
-            monitor='loss'
-        )
-
-        #Fit model
-        wrapped_model = KerasRegressor(
-            create_ann,
-            input_size=X_train_df.shape[1],
-            output_size=y_train_df.shape[1],
-            learning_rate=learning_rate,
-            epochs=n_epochs,
-            callbacks=[early_stopping],
-            #verbose=verbose
-            )
-        
-        state_reset_callback = LSTM_reset_callback()
-        wrapped_model = KerasRegressor(
-            create_rnn,
-            batch_size=batch_size,
-            time_steps=1,
-            n_features=X_train_df.shape[1],
-            output_size=y_train_df.shape[1],
-            epochs=n_epochs,
-            callbacks=[early_stopping, state_reset_callback()], #state_reset_callback
-        )
-
-        # reshape X data
-        X_train_reshaped = np.reshape(np.array(X_train_df), (X_train_df.shape[0], 1, X_train_df.shape[1]))
-
+ 
         # Cross validation
         n_splits=5
         tscv = TimeSeriesSplit(gap=0, max_train_size=None, n_splits=n_splits)

@@ -15,7 +15,7 @@ from sklearn.model_selection import cross_val_score
 from keras.wrappers.scikit_learn import KerasRegressor
 
 from helpers.transfomers import make_multistep_target
-from helpers import aggregate_hourly_data
+from preprocessing import aggregate_hourly_data
 from preprocessing import feature_generator
 from model_files.model_definition import create_ann, create_rnn, LSTM_reset_callback
 

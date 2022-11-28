@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/chrisjarrett/Documents/Personal/kaituna-flow-predictions/mlruns/4/db5cc066705041f29f37c918616b20ae/artifacts
+end_time: 1669403698293
+entry_point_name: ''
+experiment_id: '4'
+lifecycle_stage: active
+name: ''
+run_id: db5cc066705041f29f37c918616b20ae
+run_uuid: db5cc066705041f29f37c918616b20ae
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1669403698231
+status: 4
+tags: []
+user_id: chrisjarrett

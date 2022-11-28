@@ -20,4 +20,4 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ secrets.AWS_REGION }}
           function_name: predict-kaituna-flow
-          source: handle_predictions.py
+          source: predictions/handle_predictions.py

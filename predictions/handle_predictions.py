@@ -11,6 +11,7 @@ def lambda_handler(event, context):
     # Scrape data
     date_today = datetime.today().strftime('%Y-%m-%d')
     hourly_data = kaituna_web_scraper.collate_kaituna_data(date_today, date_today)
+    print(hourly_data.head())
     
     # Preprocess
     preprocessed_data = pk.load(open('preprocessing/preprocessor.pkl', 'rb'))
@@ -23,6 +24,8 @@ def lambda_handler(event, context):
     # Assemble to json file
 
     # Upload to bucket
+
+    print("hello")
     return
 
 

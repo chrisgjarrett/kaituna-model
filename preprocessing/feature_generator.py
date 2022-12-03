@@ -13,15 +13,16 @@ APPROX_MULTIYEAR_CYCLE_PERIOD = 365.25*4
 def feature_generator(X_input, target_variable):
     """Generates the features for the model"""
 
+    # Todo - add this to a config file to share with predictor
     features_of_interest = [
         "Rainfall_lead_1",
         "Rainfall_lead_2",
         "Rainfall_lead_3",
         "Rainfall",
         "LakeLevel",
-        #target_variable
+        target_variable
         ]
-    X_input = X_input[features_of_interest]
+    #X_input = X_input[features_of_interest]
     X = X_input.copy(deep=True)
 
     # Preprocessing numerical variables
@@ -34,12 +35,11 @@ def feature_generator(X_input, target_variable):
     # Bundle preprocessing for all data
     preprocessor = ColumnTransformer(
         transformers=[
-            ('num', standardiser_pipeline, X.columns)
+            ('num', standardiser_pipeline, features_of_interest)
         ], 
-        remainder = 'passthrough')
+        remainder = 'drop')
 
-    X_preprocessed = pd.DataFrame(data=preprocessor.fit_transform(X), columns = X.columns, index=X.index)
-    #X_preprocessed = X_preprocessed.dropna(axis=0)
+    X_preprocessed = pd.DataFrame(data=preprocessor.fit_transform(X), columns = features_of_interest, index=X.index)
 
     # Export trained preprocessor
     pk.dump(preprocessor, open("preprocessing/preprocessor.pkl","wb"))

@@ -8,6 +8,7 @@ from preprocessing.column_transfomer_collection import is_weekend, get_day_of_we
 from helpers.general_functions import round_to_nearest_n
 import boto3
 import json
+import pytz                                      
 
 # Days to show historical data for, excluding today
 DAYS_TO_GO_BACK = 3
@@ -21,10 +22,14 @@ def lambda_handler(event, context):
     # columns needed: rainfall 3 day's forecast, today's flow, today's rainfall, today's lakelevel
 
     # Scrape data
-    date_today = datetime.today().astimezone().strftime('%Y-%m-%d')
-    start_date = datetime.today() - timedelta(days=DAYS_TO_GO_BACK) #todo: can this be done better? - perhaps a separate web scraper?
+    date_today_obj = datetime.now(pytz.timezone('nz'))
+    start_date_obj = date_today_obj - timedelta(days=DAYS_TO_GO_BACK) #todo: can this be done better? - perhaps a separate web scraper?
+    date_today = date_today_obj.strftime('%Y-%m-%d')
+    start_date = start_date_obj.strftime('%Y-%m-%d')
+    
     hourly_data = kaituna_web_scraper.collate_kaituna_data(start_date, date_today)
 
+    # String format
     # Generate average gate ordinal    
     daily_kaituna_data = aggregate_hourly_data.aggregate_hourly_data(hourly_data)
 
@@ -35,13 +40,14 @@ def lambda_handler(event, context):
     rainfall_df.reset_index(drop=True, inplace=True)
     
     rainfall_df.columns = ["Rainfall_lead_1", "Rainfall_lead_2", "Rainfall_lead_3"]
-    
+
     X = rainfall_df.copy(deep=True)
 
     # Aggregate data
     #X["AverageGate"] = daily_kaituna_data["AverageGate"].loc[date_today]
     X["Rainfall"] = daily_kaituna_data["Rainfall"].loc[date_today]
     X["LakeLevel"] = daily_kaituna_data["LakeLevel"].loc[date_today]
+
     # Preprocess
     preprocessor = pk.load(open('preprocessing/preprocessor.pkl', 'rb'))
     X_preprocessed = preprocessor.transform(X)
@@ -61,14 +67,14 @@ def lambda_handler(event, context):
     }
 
     for idx, prediction in enumerate(predicted_gate_levels[0,:]):
-        prediction_date = (datetime.today() + timedelta(days=idx+1)).strftime('%Y-%m-%d')
+        prediction_date = (date_today_obj + timedelta(days=idx+1)).strftime('%Y-%m-%d')
         prediction_sub_dict[prediction_date]= prediction
 
     predictions_dict["PredictedData"] = prediction_sub_dict
 
     # Assemble historical flows
     for idx in range(DAYS_TO_GO_BACK):
-        historical_date = (datetime.today() - timedelta(days=idx+1)).strftime('%Y-%m-%d')
+        historical_date = (date_today_obj - timedelta(days=idx+1)).strftime('%Y-%m-%d')
         historical_flow = daily_kaituna_data[target_variable].loc[historical_date]
         historical_sub_dict[historical_date] = historical_flow
 

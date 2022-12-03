@@ -1,4 +1,0 @@
-artifact_location: file:///Users/chrisjarrett/Documents/Personal/kaituna-flow-predictions/mlruns/3
-experiment_id: '3'
-lifecycle_stage: active
-name: Trying an RNN

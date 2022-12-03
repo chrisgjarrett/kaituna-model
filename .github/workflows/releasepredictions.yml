@@ -1,6 +1,6 @@
 name: deploy to lambda
 on:
-  # Trigger the workflow on push or pull request,
+  # Trigger the workflow on push request,
   # but only for the release branch
   push:
     branches:
@@ -20,4 +20,5 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ secrets.AWS_REGION }}
           function_name: predict-kaituna-flow
-          source: handle_predictions.py
+          run: |
+          zip -r9 handle_predictions.zip handle_predictions.py

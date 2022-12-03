@@ -6,7 +6,6 @@ on:
     branches:
       - release-predictions
 jobs:
-
   deploy_source:
     name: deploy lambda from source
     runs-on: ubuntu-latest

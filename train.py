@@ -21,6 +21,7 @@ from helpers.transfomers import make_multistep_target
 from preprocessing import aggregate_hourly_data
 from preprocessing import feature_generator
 from model_files.model_definition import create_rnn
+from zip_files_for_deployment import zip_files_for_deployment
 
 # Configure logging
 logging.basicConfig(level=logging.WARN)
@@ -136,8 +137,14 @@ if __name__ == "__main__":
     # If we want to just train the model, rather than perform cross-validation
     if (TRAIN_FINAL_MODEL == True):
 
+        # Train model
         final_model = wrapped_model.fit(X_train_reshaped, y_train_df)
+        
+        # Save model files
         pk.dump(final_model, open("model_files/model.pkl","wb"))
+
+        # Pckage dependencies for deployment
+        zip_files_for_deployment()
 
         exit()
 

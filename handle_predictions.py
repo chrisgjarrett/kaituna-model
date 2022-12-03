@@ -99,6 +99,6 @@ def handle_predictions(event, context):
     object.put(Body=data_string)
 
 if __name__=="__main__":
-    lambda_handler(1, 2)
+    handle_predictions(1, 2)
 
 

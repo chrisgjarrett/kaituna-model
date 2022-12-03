@@ -1,34 +1,89 @@
-absl-py==1.3.0
+keras==2.10.0
+Keras-Preprocessing==1.1.2
+numpy==1.23.4
+pandas==1.3.5
+requests
+sklearnabsl-py==1.3.0
+alembic @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_2a7pt3va26/croot/alembic_1666725236292/work
+appdirs==1.4.4
+asn1crypto @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_325c15a5-a244-4e4d-9350-d6d0601426db54euu5k4/croots/recipe/asn1crypto_1652362646188/work
 astunparse==1.6.3
+blinker==1.4
+boto3==1.26.16
+botocore==1.29.16
+Bottleneck @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_07078715-3ab7-4562-8d3d-d56b0eaa0f7dp504n_ny/croots/recipe/bottleneck_1657175566567/work
+brotlipy==0.7.0
 cachetools==5.2.0
-certifi==2022.9.24
+certifi @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_4d2o0arbv6/croot/certifi_1665076671099/work/certifi
+cffi @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_f9af_qffaa/croots/recipe/cffi_1659598650277/work
 charset-normalizer==2.1.1
+click @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_croot-quwchbn8/click_1646123324461/work
+cloudpickle @ file:///tmp/build/80754af9/cloudpickle_1632508026186/work
+configparser @ file:///tmp/build/80754af9/configparser_1614614799251/work
+cryptography @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_20erp7jjos/croot/cryptography_1665612656373/work
+databricks-cli @ file:///home/conda/feedstock_root/build_artifacts/databricks-cli_1661538986964/work
+docker @ file:///Users/ktietz/demo/mc3/conda-bld/docker-py_1630653077722/work
+docker-pycreds @ file:///Users/ktietz/demo/mc3/conda-bld/docker-pycreds_1630654474270/work
+dominate==2.7.0
+entrypoints @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_croot-jb01gaox/entrypoints_1650293758411/work
+Flask @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_cbyfsjkqgs/croots/recipe/flask_1658870770329/work
+Flask-Bootstrap==3.3.7.1
 flatbuffers==22.10.26
 gast==0.4.0
+gitdb @ file:///tmp/build/80754af9/gitdb_1617117951232/work
+GitPython @ file:///tmp/build/80754af9/gitpython_1624609474443/work
 google-auth==2.14.1
 google-auth-oauthlib==0.4.6
 google-pasta==0.2.0
+gorilla @ file:///home/conda/feedstock_root/build_artifacts/gorilla_1619086487813/work
+greenlet @ file:///Users/ktietz/demo/mc3/conda-bld/greenlet_1628721647727/work
 grpcio==1.50.0
+gunicorn @ file:///Users/ktietz/demo/mc3/conda-bld/gunicorn_1629874228120/work
 h5py==3.7.0
-idna==3.4
+idna @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_771olrhiqw/croot/idna_1666125579282/work
 importlib-metadata==5.0.0
+itsdangerous @ file:///tmp/build/80754af9/itsdangerous_1621432558163/work
+Jinja2 @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_9fjgzv9ant/croot/jinja2_1666908141308/work
+jmespath==1.0.1
+joblib @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_70fph11sxu/croot/joblib_1666298846160/work
 keras==2.10.0
 Keras-Preprocessing==1.1.2
 libclang==14.0.6
+Mako @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_e36bw9_e01/croot/mako_1665472433821/work
 Markdown==3.4.1
-MarkupSafe==2.1.1
+MarkupSafe @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_12c133f5-0720-4727-9c18-599a3af825723lzwham3/croots/recipe/markupsafe_1654597866058/work
+numexpr @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_98sxk8lloi/croot/numexpr_1668713874222/work
 numpy==1.23.4
 oauthlib==3.2.2
 opt-einsum==3.3.0
-packaging==21.3
+packaging @ file:///tmp/build/80754af9/packaging_1637314298585/work
+pandas==1.3.5
+patsy==0.5.2
 protobuf==3.19.6
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
-pyparsing==3.0.9
-requests==2.28.1
+pycparser @ file:///tmp/build/80754af9/pycparser_1636541352034/work
+PyJWT @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_83311740-c3bc-48a8-9688-62d7e2d625f5s6jo920w/croots/recipe/pyjwt_1657544592579/work
+pyOpenSSL @ file:///opt/conda/conda-bld/pyopenssl_1643788558760/work
+pyparsing @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_3b_3vxnd07/croots/recipe/pyparsing_1661452540919/work
+PySocks @ file:///Users/ktietz/Code/oss/ci_pkgs/pysocks_1626781349491/work
+python-dateutil @ file:///tmp/build/80754af9/python-dateutil_1626374649649/work
+pytz @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_830e8540-4c59-42fe-9515-a6f79c24ff6dh653xa67/croots/recipe/pytz_1654762630628/work
+PyYAML==6.0
+querystring-parser==1.2.4
+requests @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_b15e28ca-768e-4951-b4c6-8a7476e43183hrjpnkg9/croots/recipe/requests_1657734638595/work
 requests-oauthlib==1.3.1
 rsa==4.9
-six==1.16.0
+s3transfer==0.6.0
+scikit-learn @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_85iea70f96/croot/scikit-learn_1667587552979/work
+scipy==1.9.3
+simplejson @ file:///Users/builder/miniconda3/envs/prefect/conda-bld/simplejson_1639153016617/work
+six @ file:///tmp/build/80754af9/six_1644875935023/work
+smmap @ file:///tmp/build/80754af9/smmap_1611694433573/work
+SQLAlchemy @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_273be9c0-93b1-43af-992e-5f59da1cdc80zjdbgpvr/croots/recipe/sqlalchemy_1657867858621/work
+sqlparse @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_73ubbfcjni/croot/sqlparse_1668793445223/work
+statsmodels @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_croot-h_zxnv9y/statsmodels_1648111574509/work
+tabulate @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_f3cdd6bd-78b1-4d5b-97af-649e45d859da7jp369bg/croots/recipe/tabulate_1657784109388/work
 tensorboard==2.10.1
 tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.8.1
@@ -36,8 +91,11 @@ tensorflow-estimator==2.10.0
 tensorflow-macos==2.10.0
 tensorflow-metal==0.6.0
 termcolor==2.1.0
+threadpoolctl @ file:///Users/ktietz/demo/mc3/conda-bld/threadpoolctl_1629802263681/work
 typing_extensions==4.4.0
-urllib3==1.26.12
+urllib3 @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_eetjnk38s1/croot/urllib3_1666298946680/work
+visitor==0.1.3
+websocket-client @ file:///Users/ktietz/demo/mc3/conda-bld/websocket-client_1629357070578/work
 Werkzeug==2.2.2
 wrapt==1.14.1
 zipp==3.10.0

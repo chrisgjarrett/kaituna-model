@@ -15,7 +15,7 @@ DAYS_TO_PREDICT = 3
 GATE_RESOLUTION_LEVEL = 100 # todo this shouldn't be controllable here
 target_variable = "AverageGate"
 
-def lambda_handler(event, context):
+def handle_predictions(event, context):
     """This gets deployed to AWS to make predictions and update the json data in the bucket"""
 
     # columns needed: rainfall 3 day's forecast, today's flow, today's rainfall, today's lakelevel

@@ -20,4 +20,4 @@ jobs:
           aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws_region: ${{ secrets.AWS_REGION }}
           function_name: predict-kaituna-flow
-          zip_file: run| zip -r9 handle_predictions.zip handle_predictions.py
+          zip_file: handle_predictions.zip

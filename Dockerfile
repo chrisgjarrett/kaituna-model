@@ -10,9 +10,9 @@ RUN  pip3 install -r requirements-predictions.txt --target "${LAMBDA_TASK_ROOT}"
 COPY handle_predictions.py ${LAMBDA_TASK_ROOT}
 
 # Web scraper code
-RUN mkdir -p ${LAMBDA_TASK_ROOT}/kaituna_common/web_scraper
-COPY kaituna_web_scraper.py ${LAMBDA_TASK_ROOT}/kaituna_common/web_scraper/
-COPY kaituna_common/web_scraper/rainfall_forecast_scraper.py ${LAMBDA_TASK_ROOT}/kaituna_common/web_scraper/
+RUN mkdir -p ${LAMBDA_TASK_ROOT}/web_scraper
+COPY web_scraper/kaituna_web_scraper.py ${LAMBDA_TASK_ROOT}/web_scraper/
+COPY web_scraper/rainfall_forecast_scraper.py ${LAMBDA_TASK_ROOT}/web_scraper/
 
 # Preprocessing
 RUN mkdir -p ${LAMBDA_TASK_ROOT}/preprocessing

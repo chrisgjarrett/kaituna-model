@@ -1,5 +1,5 @@
-from zipfile import ZipFile, ZipInfo
-
+from tarfile import TarFile, TarInfo
+ 
 def zip_files_for_deployment():
     """Zips the files needed to deploy model"""
 
@@ -13,18 +13,18 @@ def zip_files_for_deployment():
     ]
 
     # create a ZipFile object
-    zipObj = ZipFile('handle_predictions.zip', 'w')
+    tar = TarFile('handle_predictions.tar.gz', 'w')
 
     # Add multiple files to the zip # Todo can these strings be replaced programmitically somehow?
     for file_name in files_to_zip:
 
         # Set global read permissions
-        info = ZipInfo(file_name)
-        info.external_attr = 0o100755 << 16
-        zipObj.write(file_name)    
+        info = TarInfo(file_name)
+        info.mode = 0o100755 << 16
+        tar.add(file_name)    
 
     # close the Zip File
-    zipObj.close()
+    tar.close()
 
 if __name__=="__main__":
     zip_files_for_deployment()

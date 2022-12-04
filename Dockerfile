@@ -3,7 +3,7 @@ FROM public.ecr.aws/lambda/python:3.8-arm64
 # Install the function's dependencies using file requirements.txt
 # from your project folder.
 COPY requirements-predictions.txt  .
-RUN  pip3 install -r requirements-predictions.txt --target "${LAMBDA_TASK_ROOT}"
+RUN  pip install -r requirements-predictions.txt --target "${LAMBDA_TASK_ROOT}"
 
 # Copy function code
 COPY handle_predictions.py ${LAMBDA_TASK_ROOT}

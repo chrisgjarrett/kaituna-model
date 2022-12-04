@@ -36,6 +36,7 @@ jobs:
         AWS_ECR_REGISTRY: ${{ secrets.AWS_ECR_REGISTRY }}
         AWS_ECR_REPOSITORY: ${{ secrets.AWS_ECR_REPOSITORY }}
         IMAGE_TAG: latest
+        LAMBDA_FUNCTION_NAME: ${{secrets.LAMBDA_FUNCTION_NAME}}
       run: |
         # Build a docker container and push it to ECR
         cd ./
@@ -43,3 +44,4 @@ jobs:
         echo "Pushing image to ECR..."
         docker push $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG"
+        aws lambda update-function-code --function-name  my-$LAMBDA_FUNCTION_NAME --image-uri $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG

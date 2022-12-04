@@ -8,7 +8,7 @@ RUN  pip3 install -r requirements-predictions.txt --target "${LAMBDA_TASK_ROOT}"
 
 # Copy function code
 COPY handle_predictions.py ${LAMBDA_TASK_ROOT}
-COPY entry.sh ${LAMBDA_TASK_ROOT}
+#COPY entry.sh ${LAMBDA_TASK_ROOT}
 
 # Web scraper code
 RUN mkdir -p ${LAMBDA_TASK_ROOT}/web_scraper

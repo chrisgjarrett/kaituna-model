@@ -44,10 +44,10 @@ jobs:
         docker push $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG"
     
-      - name: Update layers
-        uses: callummackenzie/latest-lambda-layer-action@v0.12
-        with:
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws_region: ${{ secrets.AWS_REGION }
-          function_name: ${{ secrets.LAMBDA_FUNCTION_NAME }
+    - name: Update layers
+      uses: callummackenzie/latest-lambda-layer-action@v0.12
+      with:
+        aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws_region: ${{ secrets.AWS_REGION }
+        function_name: ${{ secrets.LAMBDA_FUNCTION_NAME }

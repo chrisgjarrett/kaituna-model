@@ -72,8 +72,8 @@ def handle_predictions(event, context):
     predictions_dict["PredictedData"] = prediction_sub_dict
 
     # Assemble historical flows
-    for idx in range(DAYS_TO_GO_BACK):
-        historical_date = (date_today_obj - timedelta(days=idx+1)).strftime('%Y-%m-%d')
+    for idx in range(DAYS_TO_GO_BACK,0, -1):
+        historical_date = (date_today_obj - timedelta(days=idx)).strftime('%Y-%m-%d')
         historical_flow = daily_kaituna_data[target_variable].loc[historical_date]
         historical_sub_dict[historical_date] = historical_flow
 

@@ -14,7 +14,6 @@ from sklearn.model_selection import TimeSeriesSplit
 from sklearn.model_selection import cross_val_score
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
 
 from helpers.transfomers import make_leads_transformer
 from helpers.transfomers import make_multistep_target

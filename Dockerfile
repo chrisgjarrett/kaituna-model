@@ -24,4 +24,5 @@ RUN mkdir -p ${LAMBDA_TASK_ROOT}/model_files
 COPY model_files/model.pkl ${LAMBDA_TASK_ROOT}/model_files/
 
 # Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
-CMD [ "handle_predictions.handle_predictions" ] 
+CMD [ "handle_predictions.handle_predictions" ]
+ENTRYPOINT [ "/entry.sh" ]

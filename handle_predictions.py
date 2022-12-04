@@ -6,7 +6,7 @@ import pickle as pk
 
 import boto3
 
-from kaituna_common.web_scraper import kaituna_web_scraper, rainfall_forecast_scraper
+from web_scraper import kaituna_web_scraper, rainfall_forecast_scraper
 from preprocessing import aggregate_hourly_data
 
 # Days to show historical data for, excluding today

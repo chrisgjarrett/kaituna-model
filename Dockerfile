@@ -11,7 +11,7 @@ COPY handle_predictions.py ${LAMBDA_TASK_ROOT}
 
 # Web scraper code
 RUN mkdir -p ${LAMBDA_TASK_ROOT}/kaituna_common/web_scraper
-COPY ./kaituna_common/web_scraper/kaituna_web_scraper.py ${LAMBDA_TASK_ROOT}/kaituna_common/web_scraper/
+COPY /kaituna_common/web_scraper/kaituna_web_scraper.py ${LAMBDA_TASK_ROOT}/kaituna_common/web_scraper/
 COPY kaituna_common/web_scraper/rainfall_forecast_scraper.py ${LAMBDA_TASK_ROOT}/kaituna_common/web_scraper/
 
 # Preprocessing

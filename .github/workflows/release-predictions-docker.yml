@@ -31,10 +31,10 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v1
       
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
+      uses: docker/setup-qemu-action@v2
     
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      uses: docker/setup-buildx-action@v2
 
     - name: Build, tag, and push the image to Amazon ECR
       id: build-image
@@ -46,7 +46,7 @@ jobs:
       run: |
         # Build a docker container and push it to ECR
         cd ./
-        docker buildx build --platform linux/arm64 --tag $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG .
+        docker buildx build --platform --tag $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG .
         echo "Pushing image to ECR..."
         docker push $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG
         echo "::set-output name=image::$AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG"

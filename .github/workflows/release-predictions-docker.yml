@@ -46,7 +46,7 @@ jobs:
       run: |
         # Build a docker container and push it to ECR
         cd ./
-        docker buildx build --platform linux/arm64 -t $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG .
+        docker buildx build --platform linux/arm64 -t $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG --output type=registry .
         docker image ls
         docker push $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG
 

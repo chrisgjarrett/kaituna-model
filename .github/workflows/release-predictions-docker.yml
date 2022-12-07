@@ -47,8 +47,8 @@ jobs:
         # Build a docker container and push it to ECR
         cd ./
         docker buildx build --platform linux/arm64 -t $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG .
-        - script: docker image ls
-        docker push $AWS_ECR_REGISTRY:$AWS_ECR_REPOSITORY/$AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG:$IMAGE_TAG
+        docker image ls
+        docker push $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG
 
         echo "::set-output name=image::$AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG"
         aws lambda update-function-code --function-name $LAMBDA_FUNCTION_NAME --image-uri $AWS_ECR_REGISTRY/$AWS_ECR_REPOSITORY:$IMAGE_TAG

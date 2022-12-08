@@ -7,7 +7,7 @@ import pickle as pk
 import boto3
 
 from web_scraper import kaituna_web_scraper, rainfall_forecast_scraper
-from preprocessing import aggregate_hourly_data, feature_generator
+from preprocessing import aggregate_hourly_data
 
 # Days to show historical data for, excluding today
 DAYS_TO_GO_BACK = 3
@@ -43,7 +43,7 @@ def handle_predictions(event, context):
     X = rainfall_df.copy(deep=True)
 
     # Aggregate data
-    #X["AverageGate"] = daily_kaituna_data["AverageGate"].loc[date_today]
+    X["AverageGate"] = daily_kaituna_data["AverageGate"].loc[date_today]
     X["Rainfall"] = daily_kaituna_data["Rainfall"].loc[date_today]
     X["LakeLevel"] = daily_kaituna_data["LakeLevel"].loc[date_today]
 

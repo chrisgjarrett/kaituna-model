@@ -4,6 +4,7 @@ FROM public.ecr.aws/lambda/python:3.8-arm64
 # from your project folder.
 COPY requirements-predictions.txt  .
 RUN  pip3 install -r requirements-predictions.txt --target "${LAMBDA_TASK_ROOT}"
+RUN pip3 install tensorflow-aarch64 -f https://tf.kmtea.eu/whl/stable.html
 
 # Copy function code
 COPY handle_predictions.py ${LAMBDA_TASK_ROOT}

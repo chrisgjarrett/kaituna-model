@@ -3,5 +3,5 @@ Keras-Preprocessing
 numpy
 pandas
 requests
-scikit-learn==1.2.0
+scikit-learn
 tensorflow-aarch64

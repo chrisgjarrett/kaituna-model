@@ -43,7 +43,7 @@ def handle_predictions(event, context):
     X = rainfall_df.copy(deep=True)
 
     # Aggregate data
-    X["AverageGate"] = daily_kaituna_data["AverageGate"].loc[date_today]
+    #X["AverageGate"] = daily_kaituna_data["AverageGate"].loc[date_today]
     X["Rainfall"] = daily_kaituna_data["Rainfall"].loc[date_today]
     X["LakeLevel"] = daily_kaituna_data["LakeLevel"].loc[date_today]
 

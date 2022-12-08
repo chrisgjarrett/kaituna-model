@@ -20,7 +20,7 @@ def feature_generator(X_input, target_variable):
         "Rainfall_lead_3",
         "Rainfall",
         "LakeLevel",
-        target_variable
+        #target_variable
         ]
     #X_input = X_input[features_of_interest]
     X = X_input.copy(deep=True)

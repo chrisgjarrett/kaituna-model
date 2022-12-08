@@ -7,7 +7,7 @@ import pickle as pk
 import boto3
 
 from web_scraper import kaituna_web_scraper, rainfall_forecast_scraper
-from preprocessing import aggregate_hourly_data
+from preprocessing import aggregate_hourly_data, feature_generator
 
 # Days to show historical data for, excluding today
 DAYS_TO_GO_BACK = 3

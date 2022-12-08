@@ -3,7 +3,6 @@ FROM public.ecr.aws/lambda/python:3.8-arm64
 # Install the function's dependencies using file requirements.txt
 # from your project folder.
 COPY requirements-predictions.txt  .
-#RUN pip3 install tensorflow-aarch64 -f https://tf.kmtea.eu/whl/stable.html
 RUN  pip3 install -r requirements-predictions.txt --target "${LAMBDA_TASK_ROOT}"
 
 # Copy function code
@@ -17,6 +16,7 @@ COPY web_scraper/rainfall_forecast_scraper.py ${LAMBDA_TASK_ROOT}/web_scraper/
 # Preprocessing
 RUN mkdir -p ${LAMBDA_TASK_ROOT}/preprocessing
 COPY preprocessing/aggregate_hourly_data.py ${LAMBDA_TASK_ROOT}/preprocessing/
+COPY preprocessing/feature_generator.py ${LAMBDA_TASK_ROOT}/preprocessing/
 COPY preprocessing/preprocessor.pkl ${LAMBDA_TASK_ROOT}/preprocessing/
 
 # Model files

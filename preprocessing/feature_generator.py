@@ -44,7 +44,8 @@ def feature_generator(X_input, target_variable):
     X_preprocessed = pd.DataFrame(data=preprocessor.transform(X), columns = features_of_interest, index=X.index)
 
     # Export trained preprocessor
-    pk.dump(preprocessor, open("preprocessing/preprocessor.pkl","wb"))
+    with open("preprocessing/preprocessor.pkl","wb") as f:
+        pk.dump(preprocessor, f)
 
     return X_preprocessed
 

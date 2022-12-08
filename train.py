@@ -139,7 +139,8 @@ if __name__ == "__main__":
         final_model = wrapped_model.fit(X_train_reshaped, y_train_df)
         
         # Save model files
-        pk.dump(final_model, open("model_files/model.pkl","wb"))
+        with open("model_files/model.pkl","wb") as f:
+            pk.dump(final_model, f)
 
         exit()
 

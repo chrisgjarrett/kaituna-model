@@ -39,7 +39,9 @@ def feature_generator(X_input, target_variable):
         ], 
         remainder = 'drop')
 
-    X_preprocessed = pd.DataFrame(data=preprocessor.fit_transform(X), columns = features_of_interest, index=X.index)
+    # Fit the preprocessor
+    preprocessor.fit(X)
+    X_preprocessed = pd.DataFrame(data=preprocessor.transform(X), columns = features_of_interest, index=X.index)
 
     # Export trained preprocessor
     pk.dump(preprocessor, open("preprocessing/preprocessor.pkl","wb"))

@@ -16,7 +16,6 @@ COPY web_scraper/rainfall_forecast_scraper.py ${LAMBDA_TASK_ROOT}/web_scraper/
 # Preprocessing
 RUN mkdir -p ${LAMBDA_TASK_ROOT}/preprocessing
 COPY preprocessing/aggregate_hourly_data.py ${LAMBDA_TASK_ROOT}/preprocessing/
-COPY preprocessing/feature_generator.py ${LAMBDA_TASK_ROOT}/preprocessing/
 COPY preprocessing/preprocessor.pkl ${LAMBDA_TASK_ROOT}/preprocessing/
 
 # Model files

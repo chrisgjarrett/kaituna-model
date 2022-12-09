@@ -7,7 +7,7 @@ import pickle as pk
 import boto3
 
 from web_scraper import kaituna_web_scraper, rainfall_forecast_scraper
-from preprocessing import aggregate_hourly_data, feature_generator
+from preprocessing import aggregate_hourly_data
 
 # Days to show historical data for, excluding today
 DAYS_TO_GO_BACK = 3
@@ -48,11 +48,14 @@ def handle_predictions(event, context):
     X["LakeLevel"] = daily_kaituna_data["LakeLevel"].loc[date_today]
 
     # Preprocess
-    preprocessor = pk.load(open('preprocessing/preprocessor.pkl', 'rb'))
+    with open('preprocessing/preprocessor.pkl', 'rb') as f:
+        preprocessor = pk.load(f)
     X_preprocessed = preprocessor.transform(X)
 
     # Predict #todo: update with actual model
-    model = pk.load(open('model_files/model.pkl', 'rb'))
+    with open('model_files/model.pkl', 'rb') as f:
+        model = pk.load(f)
+        
     batch_size = 1 # todo: shouldn't be here
     X_reshaped = np.reshape(np.array(X_preprocessed), (X_preprocessed.shape[0], batch_size, X_preprocessed.shape[1]))
     predicted_gate_levels = model.model.predict(X_reshaped)

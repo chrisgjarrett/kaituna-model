@@ -104,7 +104,7 @@ if __name__ == "__main__":
     training_data_df.to_csv(TRAINING_DATA_PATH)
     
     # Construct model
-    n_epochs = 10
+    n_epochs = 100
     learning_rate = 0.01
     patience = 100
     min_delta = 10

@@ -55,7 +55,7 @@ def handle_predictions(event, context):
     # Predict #todo: update with actual model
     with open('model_files/model.pkl', 'rb') as f:
         model = pk.load(f)
-        
+    
     batch_size = 1 # todo: shouldn't be here
     X_reshaped = np.reshape(np.array(X_preprocessed), (X_preprocessed.shape[0], batch_size, X_preprocessed.shape[1]))
     predicted_gate_levels = model.model.predict(X_reshaped)

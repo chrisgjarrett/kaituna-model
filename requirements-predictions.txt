@@ -5,3 +5,4 @@ pandas
 requests
 scikit-learn
 tensorflow-aarch64
+tensorflow-io

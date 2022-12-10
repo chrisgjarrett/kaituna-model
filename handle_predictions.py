@@ -87,21 +87,26 @@ def handle_predictions(event, context):
     data_string = json.dumps(predictions_dict, indent=2, default=str)
 
     # Upload JSON String to an S3 bucket
-    # Upload to bucket #todo: Need to change this to however lambda function will do it.
-    with open("secrets.json") as f:
-        secrets = json.load(f)
-    #Creating Session With Boto3.
-    session = boto3.Session(
-    aws_access_key_id=secrets["AWS_ACCESS_KEY_ID"],
-    aws_secret_access_key=secrets["AWS_ACCESS_SECRET_KEY"]
-    )
+    
+    # Try and authenticate with local secrets file
+    try:
+        #Creating Session With Boto3.
+        session = boto3.Session(
+        aws_access_key_id=event["AWS_ACCESS_KEY_ID"],
+        aws_secret_access_key=event["AWS_ACCESS_SECRET_KEY"]
+        )
+    # Try and authenticate without
+    except:
+        session = boto3.Session()
 
     #Creating S3 Resource From the Session.
     s3 = session.resource('s3')
-    object = s3.Object(secrets["BUCKET_NAME"], 'data.json')
+    object = s3.Object(event["BUCKET_NAME"], 'data.json')
     object.put(Body=data_string)
 
 if __name__=="__main__":
-    handle_predictions(1, 2)
+    with open("secrets.json") as f:
+        secrets = json.load(f)
+    handle_predictions(secrets, 2)
 
 

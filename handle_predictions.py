@@ -65,7 +65,8 @@ def handle_predictions(event, context):
     prediction_sub_dict = {}
     predictions_dict = {
         "HistoricalData" : {},
-        "PredictedData": {}
+        "PredictedData": {},
+        "LastUpdated": {}
     }
 
     for idx, prediction in enumerate(predicted_gate_levels[0,:]):
@@ -83,6 +84,9 @@ def handle_predictions(event, context):
     historical_sub_dict["Today"] = daily_kaituna_data.loc[date_today][target_variable]
     predictions_dict["HistoricalData"] = historical_sub_dict
 
+    # Add the time it is being updated at
+    predictions_dict["LastUpdated"] = date_today_obj
+    
     # Convert Dictionary to JSON String
     data_string = json.dumps(predictions_dict, indent=2, default=str)
 

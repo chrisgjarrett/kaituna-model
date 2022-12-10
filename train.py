@@ -14,6 +14,7 @@ from sklearn.model_selection import TimeSeriesSplit
 from sklearn.model_selection import cross_val_score
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.compose import ColumnTransformer
+from matplotlib import pyplot as plt
 
 from helpers.transfomers import make_leads_transformer
 from helpers.transfomers import make_multistep_target
@@ -104,13 +105,13 @@ if __name__ == "__main__":
     training_data_df.to_csv(TRAINING_DATA_PATH)
     
     # Construct model
-    n_epochs = 100
+    n_epochs = 1000
     learning_rate = 0.01
     patience = 100
     min_delta = 10
     batch_size = 1 # Play with this
     n_hidden_layers = 1
-    lstm_units = 100
+    lstm_units = {"layer1":50, "layer2":25}
        
     early_stopping = EarlyStopping(
         min_delta=min_delta, # minimium amount of change to count as an improvement
@@ -138,6 +139,16 @@ if __name__ == "__main__":
         # Train model
         final_model = wrapped_model.fit(X_train_reshaped, y_train_df)
         
+        # Examine history
+        history = final_model.history
+        plt.plot(history['loss'])
+        plt.plot(history['val_loss'])
+        plt.title('model loss')
+        plt.ylabel('loss')
+        plt.xlabel('epoch')
+        plt.legend(['train', 'val'], loc='upper left')
+        plt.show()
+
         # Save model files
         with open("model_files/model.pkl","wb") as f:
             pk.dump(final_model, f)

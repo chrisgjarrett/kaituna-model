@@ -85,7 +85,7 @@ def handle_predictions(event, context):
     predictions_dict["HistoricalData"] = historical_sub_dict
 
     # Add the time it is being updated at
-    predictions_dict["LastUpdated"] = date_today_obj
+    predictions_dict["LastUpdated"] = date_today_obj.replace(microsecond=0)
     
     # Convert Dictionary to JSON String
     data_string = json.dumps(predictions_dict, indent=2, default=str)

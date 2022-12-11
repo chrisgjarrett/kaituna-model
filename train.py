@@ -105,11 +105,11 @@ if __name__ == "__main__":
     training_data_df.to_csv(TRAINING_DATA_PATH)
     
     # Construct model
-    n_epochs = 1000
+    n_epochs = 10000
     learning_rate = 0.01
-    patience = 100
-    min_delta = 10
-    batch_size = 1 # Play with this
+    patience = 200
+    min_delta = 1
+    batch_size = 7 # Play with this
     n_hidden_layers = 1
     lstm_units = {"layer1":50, "layer2":25}
        
@@ -121,16 +121,18 @@ if __name__ == "__main__":
     )
 
     # Reshape for RNN
-    X_train_reshaped = np.reshape(np.array(X_train_df), (X_train_df.shape[0], batch_size, X_train_df.shape[1]))
+    #X_train_reshaped = np.reshape(np.array(X_train_df), (X_train_df.shape[0], batch_size, X_train_df.shape[1]))
 
     # If we want to just train the model, rather than perform cross-validation
     if (TRAIN_FINAL_MODEL == True):
 
         # Train model
         model_def = create_ann(
-            batch_size, X_train_df.shape[1], y_train_df.shape[1], learning_rate=learning_rate)
+            X_train_df.shape[1],
+            y_train_df.shape[1], learning_rate=learning_rate)
+
         final_model = model_def.fit(
-            X_train_reshaped,
+            X_train_df,
             y_train_df,
             batch_size=batch_size,
             validation_data=(X_test_df, y_test_df),
@@ -145,7 +147,7 @@ if __name__ == "__main__":
         plt.ylabel('loss')
         plt.xlabel('epoch')
         plt.legend(['train', 'val'], loc='upper left')
-        plt.show()
+        plt.show(block=False)
 
         # Save model files
         with open("model_files/model.pkl","wb") as f:

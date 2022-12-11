@@ -2,6 +2,21 @@ import tensorflow as tf
 import keras
 from keras import layers, metrics
 
+def create_ann(batch_size, n_features, output_size, learning_rate=0.01):
+
+    model = keras.Sequential([
+        layers.Dense(units=50, activation='relu', input_shape=(batch_size, n_features)),
+        layers.Dense(units=25, activation='relu'),
+        layers.Dense(units=output_size),
+        ])
+
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(epsilon=learning_rate),
+        metrics=[metrics.RootMeanSquaredError()],
+        loss='mean_squared_error',
+    )
+
+    return model
 
 def create_rnn(batch_size, time_steps, n_features, output_size, learning_rate=0.01):
 

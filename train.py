@@ -20,7 +20,7 @@ from helpers.transfomers import make_leads_transformer
 from helpers.transfomers import make_multistep_target
 from preprocessing import aggregate_hourly_data
 from preprocessing import feature_generator
-from model_files.model_definition import create_rnn
+from model_files.model_definition import create_rnn, create_ann
 
 # Configure logging
 logging.basicConfig(level=logging.WARN)
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     y, X = y.align(X_features, join='inner', axis=0)
 
     # Split into test and train/validation
-    X_train_df, X_test_df, y_train_df, y_test = train_test_split(X, y, test_size=0.20, shuffle=False)
+    X_train_df, X_test_df, y_train_df, y_test_df = train_test_split(X, y, test_size=0.20, shuffle=False)
 
     # Save dataframe to file for artifact logging
     training_data_df = pd.concat([X_train_df, y_train_df], axis=1)
@@ -120,16 +120,6 @@ if __name__ == "__main__":
         monitor='loss'
     )
 
-    wrapped_model = KerasRegressor(
-        create_rnn,
-        batch_size=batch_size,
-        time_steps=1,
-        n_features=X_train_df.shape[1],
-        output_size=y_train_df.shape[1],
-        epochs=n_epochs,
-        callbacks=[early_stopping], #state_reset_callback
-    )
-
     # Reshape for RNN
     X_train_reshaped = np.reshape(np.array(X_train_df), (X_train_df.shape[0], batch_size, X_train_df.shape[1]))
 
@@ -137,7 +127,15 @@ if __name__ == "__main__":
     if (TRAIN_FINAL_MODEL == True):
 
         # Train model
-        final_model = wrapped_model.fit(X_train_reshaped, y_train_df)
+        model_def = create_ann(
+            batch_size, X_train_df.shape[1], y_train_df.shape[1], learning_rate=learning_rate)
+        final_model = model_def.fit(
+            X_train_reshaped,
+            y_train_df,
+            batch_size=batch_size,
+            validation_data=(X_test_df, y_test_df),
+            callbacks=[early_stopping],
+            epochs=n_epochs)
         
         # Examine history
         history = final_model.history
@@ -164,6 +162,15 @@ if __name__ == "__main__":
     # Start experiment
     with mlflow.start_run():    
         
+        wrapped_model = KerasRegressor(
+            create_ann,
+            batch_size=batch_size,
+            time_steps=1,
+            n_features=X_train_df.shape[1],
+            output_size=y_train_df.shape[1],
+            epochs=n_epochs,
+            callbacks=[early_stopping], #state_reset_callback
+        )
         # Cross validation
         n_splits=5
         tscv = TimeSeriesSplit(gap=0, max_train_size=None, n_splits=n_splits)

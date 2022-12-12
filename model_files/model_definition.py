@@ -5,10 +5,9 @@ from keras import layers, metrics
 def create_ann(n_features, output_size, learning_rate=0.01):
 
     model = keras.Sequential([
-        layers.Dense(units=100, activation='relu', input_shape=(n_features,)),
+        layers.Dense(units=50, activation='relu', input_shape=(n_features,)),
         layers.Dropout(0.15),
-        layers.Dense(units=50, activation='relu'),
-        layers.Dense(units=25, activation='relu'),
+        layers.Dense(units=10, activation='relu'),
         layers.Dense(units=output_size),
         ])
 

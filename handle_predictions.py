@@ -57,8 +57,8 @@ def handle_predictions(event, context):
         model = pk.load(f)
     
     batch_size = 1 # todo: shouldn't be here
-    X_reshaped = np.reshape(np.array(X_preprocessed), (X_preprocessed.shape[0], batch_size, X_preprocessed.shape[1]))
-    predicted_gate_levels = model.model.predict(X_reshaped)
+    #X_reshaped = np.reshape(np.array(X_preprocessed), (X_preprocessed.shape[0], batch_size, X_preprocessed.shape[1]))
+    predicted_gate_levels = model.model.predict(X_preprocessed)
 
     # Assemble to json file #todo put this in a method
     historical_sub_dict = {}

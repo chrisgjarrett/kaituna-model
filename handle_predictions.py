@@ -91,7 +91,6 @@ def handle_predictions(event, context):
     data_string = json.dumps(predictions_dict, indent=2, default=str)
 
     # Upload JSON String to an S3 bucket
-    
     # Try and authenticate with local secrets file
     try:
         #Creating Session With Boto3.

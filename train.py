@@ -15,12 +15,14 @@ from sklearn.model_selection import cross_val_score
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.compose import ColumnTransformer
 from matplotlib import pyplot as plt
+import seaborn as sns
 
 from helpers.transfomers import make_leads_transformer
 from helpers.transfomers import make_multistep_target
 from preprocessing import aggregate_hourly_data
 from preprocessing import feature_generator
 from model_files.model_definition import create_rnn, create_ann
+from helpers.plotting_helpers import visualise_results
 
 # Configure logging
 logging.basicConfig(level=logging.WARN)
@@ -109,7 +111,9 @@ if __name__ == "__main__":
     learning_rate = 0.01
     patience = 200
     min_delta = 1
-    batch_size = 7 # Play with this
+    batch_size = 8 # Play with this
+    rnn_samples_size = 1
+    rnn_input_timesteps = 1
     n_hidden_layers = 1
     lstm_units = {"layer1":50, "layer2":25}
        
@@ -120,22 +124,27 @@ if __name__ == "__main__":
         monitor='loss'
     )
 
+    wrapped_model = KerasRegressor(
+            create_rnn,
+            input_shape=(rnn_input_timesteps, X_train_df.shape[1]),
+            output_size=y_train_df.shape[1],
+            epochs=n_epochs,
+            batch_size=batch_size,
+            callbacks=[early_stopping],
+            verbose=True, #state_reset_callback
+        )
+
     # Reshape for RNN
-    #X_train_reshaped = np.reshape(np.array(X_train_df), (X_train_df.shape[0], batch_size, X_train_df.shape[1]))
+    X_train_df_rnn = np.reshape(np.array(X_train_df), (X_train_df.shape[0], rnn_input_timesteps, X_train_df.shape[1]))
+    X_test_df_rnn = np.reshape(np.array(X_test_df), (X_test_df.shape[0], rnn_input_timesteps, X_test_df.shape[1]))
 
     # If we want to just train the model, rather than perform cross-validation
     if (TRAIN_FINAL_MODEL == True):
 
-        # Train model
-        model_def = create_ann(
-            X_train_df.shape[1],
-            y_train_df.shape[1], learning_rate=learning_rate)
-
-        final_model = model_def.fit(
-            X_train_df,
+        final_model = wrapped_model.fit(
+            X_train_df_rnn,
             y_train_df,
-            batch_size=batch_size,
-            validation_data=(X_test_df, y_test_df),
+            validation_data=(X_test_df_rnn, y_test_df),
             callbacks=[early_stopping],
             epochs=n_epochs)
         
@@ -148,6 +157,11 @@ if __name__ == "__main__":
         plt.xlabel('epoch')
         plt.legend(['train', 'val'], loc='upper left')
         plt.show(block=False)
+
+        y_fit = pd.DataFrame(final_model.model.predict(X_train_df_rnn), index=X_train_df.index, columns=y_train_df.columns)
+        y_pred = pd.DataFrame(final_model.model.predict(X_test_df_rnn), index=X_test_df.index, columns=y_test_df.columns)
+
+        visualise_results(daily_kaituna_data[TARGET_VARIABLE], y_fit, y_pred)
 
         # Save model files
         with open("model_files/model.pkl","wb") as f:
@@ -163,22 +177,13 @@ if __name__ == "__main__":
 
     # Start experiment
     with mlflow.start_run():    
-        
-        wrapped_model = KerasRegressor(
-            create_ann,
-            batch_size=batch_size,
-            time_steps=1,
-            n_features=X_train_df.shape[1],
-            output_size=y_train_df.shape[1],
-            epochs=n_epochs,
-            callbacks=[early_stopping], #state_reset_callback
-        )
+
         # Cross validation
         n_splits=5
         tscv = TimeSeriesSplit(gap=0, max_train_size=None, n_splits=n_splits)
         scores = cross_val_score(
             wrapped_model,
-            X_train_reshaped,
+            X_train_df_rnn,
             y_train_df,
             cv=tscv,
             scoring='neg_mean_squared_error',
@@ -201,6 +206,7 @@ if __name__ == "__main__":
         mlflow.log_param('stateful', False)
         mlflow.log_param("n_hidden_layers", n_hidden_layers)
         mlflow.log_param("units", lstm_units)
+        mlflow.log_param("batch_size", batch_size)
 
         # Save model and data set
         mlflow.sklearn.log_model(
@@ -209,4 +215,3 @@ if __name__ == "__main__":
         )
 
         mlflow.log_artifacts('datasets', TRAINING_DATA_PATH)
-

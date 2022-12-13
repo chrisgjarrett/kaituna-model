@@ -56,8 +56,8 @@ def handle_predictions(event, context):
     with open('model_files/model.pkl', 'rb') as f:
         model = pk.load(f)
     
-    batch_size = 1 # todo: shouldn't be here
-    #X_reshaped = np.reshape(np.array(X_preprocessed), (X_preprocessed.shape[0], batch_size, X_preprocessed.shape[1]))
+    rnn_input_timesteps = 1 # todo: shouldn't be here
+    X_preprocessed = np.reshape(np.array(X_preprocessed), (X_preprocessed.shape[0], rnn_input_timesteps, X_preprocessed.shape[1]))
     predicted_gate_levels = model.model.predict(X_preprocessed)
 
     # Assemble to json file #todo put this in a method

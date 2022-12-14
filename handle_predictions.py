@@ -13,7 +13,9 @@ from preprocessing import aggregate_hourly_data
 DAYS_TO_GO_BACK = 3
 DAYS_TO_PREDICT = 3
 GATE_RESOLUTION_LEVEL = 100 # todo this shouldn't be controllable here
-target_variable = "AverageGate"
+GRAPH_DATE_DISPLAY_FORMAT = '%a %d' # 3 letter day and date
+DATE_INDEX_FORMAT = "%Y-%m-%d" # String format for indexing the dataframes
+TARGET_VARIABLE = "AverageGate"
 
 def handle_predictions(event, context):
     """This gets deployed to AWS to make predictions and update the json data in the bucket"""
@@ -23,8 +25,8 @@ def handle_predictions(event, context):
     # Scrape data
     date_today_obj = datetime.now(pytz.timezone('nz'))
     start_date_obj = date_today_obj - timedelta(days=DAYS_TO_GO_BACK) #todo: can this be done better? - perhaps a separate web scraper?
-    date_today = date_today_obj.strftime('%Y-%m-%d')
-    start_date = start_date_obj.strftime('%Y-%m-%d')
+    date_today = date_today_obj.strftime(DATE_INDEX_FORMAT)
+    start_date = start_date_obj.strftime(DATE_INDEX_FORMAT)
     
     hourly_data = kaituna_web_scraper.collate_kaituna_data(start_date, date_today)
 
@@ -70,18 +72,21 @@ def handle_predictions(event, context):
     }
 
     for idx, prediction in enumerate(predicted_gate_levels[0,:]):
-        prediction_date = (date_today_obj + timedelta(days=idx+1)).strftime('%Y-%m-%d')
-        prediction_sub_dict[prediction_date]= prediction
+        prediction_date_object = date_today_obj - timedelta(days=idx)
+        prediction_date_display = prediction_date_object.strftime(GRAPH_DATE_DISPLAY_FORMAT)
+        prediction_sub_dict[prediction_date_display] = prediction
 
     predictions_dict["PredictedData"] = prediction_sub_dict
 
     # Assemble historical flows
     for idx in range(DAYS_TO_GO_BACK,0, -1):
-        historical_date = (date_today_obj - timedelta(days=idx)).strftime('%Y-%m-%d')
-        historical_flow = daily_kaituna_data[target_variable].loc[historical_date]
-        historical_sub_dict[historical_date] = historical_flow
+        historical_date_object = date_today_obj - timedelta(days=idx)
+        historical_date_display = historical_date_object.strftime(GRAPH_DATE_DISPLAY_FORMAT)
+        historical_date_index = historical_date_object.strftime(DATE_INDEX_FORMAT)
+        historical_flow = daily_kaituna_data[TARGET_VARIABLE].loc[historical_date_index]
+        historical_sub_dict[historical_date_display] = historical_flow
 
-    historical_sub_dict["Today"] = daily_kaituna_data.loc[date_today][target_variable]
+    historical_sub_dict["Today"] = daily_kaituna_data.loc[date_today][TARGET_VARIABLE]
     predictions_dict["HistoricalData"] = historical_sub_dict
 
     # Add the time it is being updated at

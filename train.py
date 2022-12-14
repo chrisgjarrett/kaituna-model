@@ -108,10 +108,10 @@ if __name__ == "__main__":
     
     # Construct model
     n_epochs = 10000
-    learning_rate = 0.01
-    patience = 200
+    learning_rate = 0.005
+    patience = 250
     min_delta = 1
-    batch_size = 8 # Play with this
+    batch_size = 3 # Play with this
     rnn_samples_size = 1
     rnn_input_timesteps = 1
     n_hidden_layers = 1

@@ -22,9 +22,9 @@ def create_ann(n_features, output_size, learning_rate=0.01):
 def create_rnn(input_shape, output_size, learning_rate=0.05):
 
     model = keras.Sequential([
-        layers.LSTM(units=100, activation='relu', input_shape=input_shape, stateful=False, return_sequences=True),
-        layers.LSTM(units=50, activation='relu', stateful=False),
-        layers.Dense(units=10, activation='relu'),
+        layers.LSTM(units=50, activation='relu', input_shape=input_shape, stateful=False, return_sequences=False),
+        #layers.LSTM(units=50, activation='relu', stateful=False),
+        #layers.Dense(units=10, activation='relu'),
         layers.Dense(units=output_size),
         ])
 

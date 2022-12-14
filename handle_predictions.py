@@ -72,7 +72,7 @@ def handle_predictions(event, context):
     }
 
     for idx, prediction in enumerate(predicted_gate_levels[0,:]):
-        prediction_date_object = date_today_obj - timedelta(days=idx)
+        prediction_date_object = date_today_obj + timedelta(days=idx+1)
         prediction_date_display = prediction_date_object.strftime(GRAPH_DATE_DISPLAY_FORMAT)
         prediction_sub_dict[prediction_date_display] = prediction
 

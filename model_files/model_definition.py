@@ -1,14 +1,21 @@
 import tensorflow as tf
 import keras
 from keras import layers, metrics
+from keras import backend as BK
 
-def create_ann(n_features, output_size, learning_rate=0.01):
+
+def mapping_to_target_range( x, target_min, target_max) :
+    x02 = BK.tanh(x) + 1 # x in range(0,2)
+    scale = ( target_max-target_min )/2.
+    return  x02 * scale + target_min
+
+def create_ann(input_shape, output_size, learning_rate=0.01,  max_output=1500, min_output=0):
 
     model = keras.Sequential([
-        layers.Dense(units=50, activation='relu', input_shape=(n_features,)),
+        layers.Dense(units=50, activation='relu', input_shape=(input_shape)),
         layers.Dropout(0.15),
         layers.Dense(units=10, activation='relu'),
-        layers.Dense(units=output_size),
+        layers.Dense(units=output_size, activation=lambda x: mapping_to_target_range(x, target_max=max_output, target_min=min_output)),
         ])
 
     model.compile(
@@ -19,13 +26,16 @@ def create_ann(n_features, output_size, learning_rate=0.01):
 
     return model
 
-def create_rnn(input_shape, output_size, learning_rate=0.05):
+def create_rnn(input_shape, output_size, learning_rate=0.05, max_output=1500, min_output=0):
 
     model = keras.Sequential([
-        layers.LSTM(units=50, activation='relu', input_shape=input_shape, stateful=False, return_sequences=False),
-        #layers.LSTM(units=50, activation='relu', stateful=False),
-        #layers.Dense(units=10, activation='relu'),
-        layers.Dense(units=output_size),
+        #layers.ConvLSTM1D(filters = 3, kernel_size=3, activation='relu', input_shape=input_shape), 
+        #layers.TimeDistributed(layers.Conv1D(filters = 3, kernel_size = 3, input_shape=input_shape), input_shape = input_shape),
+        layers.Conv1D(filters = 2, kernel_size = 3, input_shape=input_shape, activation='relu',),
+        layers.LSTM(units=10, activation='relu', stateful=False, return_sequences=False, input_shape=input_shape),
+        #layers.Dropout(0.15),
+        #layers.LSTM(units=10, activation='relu', stateful=False, return_sequences=False),
+        layers.Dense(units=output_size, activation=lambda x: mapping_to_target_range(x, target_max=max_output, target_min=min_output)),
         ])
 
     model.compile(

@@ -1,0 +1,4 @@
+artifact_location: file:///Users/chrisjarrett/Documents/Personal/kaituna-timeseries-project/kaituna-model/mlruns/1
+experiment_id: '1'
+lifecycle_stage: active
+name: 3 day history LSTM

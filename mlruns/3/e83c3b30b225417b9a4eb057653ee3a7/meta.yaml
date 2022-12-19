@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/chrisjarrett/Documents/Personal/kaituna-timeseries-project/kaituna-model/mlruns/3/e83c3b30b225417b9a4eb057653ee3a7/artifacts
+end_time: null
+entry_point_name: ''
+experiment_id: '3'
+lifecycle_stage: active
+name: ''
+run_id: e83c3b30b225417b9a4eb057653ee3a7
+run_uuid: e83c3b30b225417b9a4eb057653ee3a7
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1671397401508
+status: 1
+tags: []
+user_id: chrisjarrett

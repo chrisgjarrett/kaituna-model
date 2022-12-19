@@ -22,6 +22,7 @@ from helpers.transfomers import make_multistep_target
 from preprocessing import aggregate_hourly_data
 from preprocessing import feature_generator
 from model_files.model_definition import create_rnn, create_ann
+from model_files.rnn_helpers import window_reshape_for_rnn
 from helpers.plotting_helpers import visualise_results
 
 # Configure logging
@@ -32,8 +33,15 @@ DAYS_TO_PREDICT = 3
 TARGET_VARIABLE = "AverageGate"
 GATE_RESOLUTION_LEVEL = 100
 TRAINING_DATA_PATH = "datasets/training_data_artifact.csv"
+MAX_OUTPUT = 1500
+MIN_OUTPUT = 0
 
+
+# Are we training the final model or running cross-validation?
 TRAIN_FINAL_MODEL = True
+
+# Experiment name
+experiment_name = 'CNN-RNN hybrid'
 
 # Load data
 if __name__ == "__main__":
@@ -95,8 +103,6 @@ if __name__ == "__main__":
 
     # Drop columns with missing values    
     y = y.dropna()
-
-    # Align the X and y
     y, X = y.align(X_features, join='inner', axis=0)
 
     # Split into test and train/validation
@@ -107,15 +113,14 @@ if __name__ == "__main__":
     training_data_df.to_csv(TRAINING_DATA_PATH)
     
     # Construct model
-    n_epochs = 10000
-    learning_rate = 0.005
-    patience = 250
+    n_epochs = 100000
+    learning_rate = 0.001
+    patience = 8000
     min_delta = 1
-    batch_size = 3 # Play with this
-    rnn_samples_size = 1
-    rnn_input_timesteps = 1
+    batch_size = 16 # Play with this
+    n_timesteps = 3
     n_hidden_layers = 1
-    lstm_units = {"layer1":50, "layer2":25}
+    lstm_units = {"layer1":50}
        
     early_stopping = EarlyStopping(
         min_delta=min_delta, # minimium amount of change to count as an improvement
@@ -124,10 +129,14 @@ if __name__ == "__main__":
         monitor='loss'
     )
 
+#input_shape=(n_steps, 1, n_length, n_features)
     wrapped_model = KerasRegressor(
             create_rnn,
-            input_shape=(rnn_input_timesteps, X_train_df.shape[1]),
+            input_shape=(n_timesteps, X_train_df.shape[1]),
             output_size=y_train_df.shape[1],
+            learning_rate=learning_rate,
+            max_output = MAX_OUTPUT,
+            min_output = MIN_OUTPUT,
             epochs=n_epochs,
             batch_size=batch_size,
             callbacks=[early_stopping],
@@ -135,8 +144,14 @@ if __name__ == "__main__":
         )
 
     # Reshape for RNN
-    X_train_df_rnn = np.reshape(np.array(X_train_df), (X_train_df.shape[0], rnn_input_timesteps, X_train_df.shape[1]))
-    X_test_df_rnn = np.reshape(np.array(X_test_df), (X_test_df.shape[0], rnn_input_timesteps, X_test_df.shape[1]))
+    # Window the data into lstm form
+    ctr = 0
+    X_train_df_rnn = window_reshape_for_rnn(X_train_df, n_timesteps)
+    X_test_df_rnn = window_reshape_for_rnn(X_test_df, n_timesteps)
+
+    # Align the X and y
+    y_train_df = y_train_df.iloc[n_timesteps:,:]
+    y_test_df = y_test_df.iloc[n_timesteps:,:]
 
     # If we want to just train the model, rather than perform cross-validation
     if (TRAIN_FINAL_MODEL == True):
@@ -158,8 +173,8 @@ if __name__ == "__main__":
         plt.legend(['train', 'val'], loc='upper left')
         plt.show(block=False)
 
-        y_fit = pd.DataFrame(final_model.model.predict(X_train_df_rnn), index=X_train_df.index, columns=y_train_df.columns)
-        y_pred = pd.DataFrame(final_model.model.predict(X_test_df_rnn), index=X_test_df.index, columns=y_test_df.columns)
+        y_fit = pd.DataFrame(final_model.model.predict(X_train_df_rnn), index=X_train_df.index[n_timesteps:], columns=y_train_df.columns)
+        y_pred = pd.DataFrame(final_model.model.predict(X_test_df_rnn), index=X_test_df.index[n_timesteps:], columns=y_test_df.columns)
 
         visualise_results(daily_kaituna_data[TARGET_VARIABLE], y_fit, y_pred)
 
@@ -172,7 +187,6 @@ if __name__ == "__main__":
     # Cross-validation
     #todo run this multiple times and do statistics
     # to try: lstm complexities, hybrid cnn, hybrid with dense
-    experiment_name = 'Comparing LSTM complexities'
     mlflow.set_experiment(experiment_name)
 
     # Start experiment
@@ -187,7 +201,7 @@ if __name__ == "__main__":
             y_train_df,
             cv=tscv,
             scoring='neg_mean_squared_error',
-            #fit_params={'model__callbacks':[early_stopping]}
+            fit_params={'validation_data':(X_test_df_rnn, y_test_df)}
         )
 
         scores = np.sqrt(-scores)
@@ -202,7 +216,7 @@ if __name__ == "__main__":
         mlflow.log_param("learning_rate", learning_rate)
         mlflow.log_param("early_stopping_patience", patience)
         mlflow.log_param("early_stopping_min_delta", min_delta)
-        mlflow.log_param('time_steps',1)
+        mlflow.log_param('time_steps',n_timesteps)
         mlflow.log_param('stateful', False)
         mlflow.log_param("n_hidden_layers", n_hidden_layers)
         mlflow.log_param("units", lstm_units)

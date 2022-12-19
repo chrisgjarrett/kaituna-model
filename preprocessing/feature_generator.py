@@ -19,9 +19,9 @@ def feature_generator(X_input, target_variable):
        # "Rainfall_lead_1",
         #"Rainfall_lead_2",
         #"Rainfall_lead_3",
-        #"Rainfall",
+        "Rainfall",
         "LakeLevel",
-        #target_variable
+        target_variable
         ]
     X_input = X_input[features_of_interest]
     X = X_input.copy(deep=True)
@@ -29,8 +29,8 @@ def feature_generator(X_input, target_variable):
     # Preprocessing numerical variables
     standardiser_pipeline = Pipeline(steps=[
         ('scale', StandardScaler()),
-        #('pca', PCA()),
-        #('scaler', StandardScaler())
+        ('pca', PCA()),
+        ('scaler', StandardScaler())
     ])
 
     # Bundle preprocessing for all data
@@ -38,10 +38,10 @@ def feature_generator(X_input, target_variable):
         transformers=[
             ('num', standardiser_pipeline, features_of_interest)
         ], 
-        remainder = 'drop')
+        remainder = 'passthrough')
 
     # Fit the preprocessor
-    X_preprocessed = pd.DataFrame(data=preprocessor.fit_transform(X), columns = features_of_interest, index=X.index)
+    X_preprocessed = pd.DataFrame(data=preprocessor.fit_transform(X), index=X.index)
 
     # Export trained preprocessor
     with open("preprocessing/preprocessor.pkl","wb") as f:

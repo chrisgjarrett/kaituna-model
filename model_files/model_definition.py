@@ -12,9 +12,11 @@ def mapping_to_target_range( x, target_min, target_max) :
 def create_ann(input_shape, output_size, learning_rate=0.01,  max_output=1500, min_output=0):
 
     model = keras.Sequential([
-        layers.Dense(units=50, activation='relu', input_shape=(input_shape)),
-        layers.Dropout(0.15),
-        layers.Dense(units=10, activation='relu'),
+        layers.Dense(units=150, activation='relu', input_shape=(input_shape)),
+        layers.Dropout(0.05),
+        layers.Dense(units=75, activation='relu'),
+        layers.Dropout(0.05),
+        layers.Dense(units=25, activation='relu'),
         layers.Dense(units=output_size, activation=lambda x: mapping_to_target_range(x, target_max=max_output, target_min=min_output)),
         ])
 
@@ -31,10 +33,10 @@ def create_rnn(input_shape, output_size, learning_rate=0.05, max_output=1500, mi
     model = keras.Sequential([
         #layers.ConvLSTM1D(filters = 3, kernel_size=3, activation='relu', input_shape=input_shape), 
         #layers.TimeDistributed(layers.Conv1D(filters = 3, kernel_size = 3, input_shape=input_shape), input_shape = input_shape),
-        layers.Conv1D(filters = 2, kernel_size = 3, input_shape=input_shape, activation='relu',),
         layers.LSTM(units=10, activation='relu', stateful=False, return_sequences=False, input_shape=input_shape),
-        #layers.Dropout(0.15),
-        #layers.LSTM(units=10, activation='relu', stateful=False, return_sequences=False),
+        layers.Dense(units=25, activation='relu'),
+        layers.Dropout(0.15),
+        layers.Dense(units=10, activation='relu'),
         layers.Dense(units=output_size, activation=lambda x: mapping_to_target_range(x, target_max=max_output, target_min=min_output)),
         ])
 

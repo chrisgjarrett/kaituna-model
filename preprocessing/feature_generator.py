@@ -29,8 +29,8 @@ def feature_generator(X_input, target_variable):
     # Preprocessing numerical variables
     standardiser_pipeline = Pipeline(steps=[
         ('scale', StandardScaler()),
-        ('pca', PCA()),
-        ('scaler', StandardScaler())
+        #('pca', PCA()),
+        #('scaler', StandardScaler())
     ])
 
     # Bundle preprocessing for all data

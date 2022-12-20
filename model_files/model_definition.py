@@ -17,7 +17,8 @@ def create_ann(input_shape, output_size, learning_rate=0.01,  max_output=1500, m
         layers.Dense(units=75, activation='relu'),
         layers.Dropout(0.05),
         layers.Dense(units=25, activation='relu'),
-        layers.Dense(units=output_size, activation=lambda x: mapping_to_target_range(x, target_max=max_output, target_min=min_output)),
+        layers.Dense(units=output_size),
+        layers.Lambda(lambda x: mapping_to_target_range(x, target_max=max_output, target_min=min_output))
         ])
 
     model.compile(

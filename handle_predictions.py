@@ -5,9 +5,11 @@ import pytz
 import pickle as pk
 
 import boto3
+from keras.models import load_model
 
 from web_scraper import kaituna_web_scraper, rainfall_forecast_scraper
 from preprocessing import aggregate_hourly_data
+from model_files.model_definition import mapping_to_target_range
 
 # Days to show historical data for, excluding today
 DAYS_TO_GO_BACK = 3
@@ -45,22 +47,22 @@ def handle_predictions(event, context):
     X = rainfall_df.copy(deep=True)
 
     # Aggregate data
-    #X["AverageGate"] = daily_kaituna_data["AverageGate"].loc[date_today]
+    X["AverageGate"] = daily_kaituna_data["AverageGate"].loc[date_today]
     X["Rainfall"] = daily_kaituna_data["Rainfall"].loc[date_today]
     X["LakeLevel"] = daily_kaituna_data["LakeLevel"].loc[date_today]
 
     # Preprocess
     with open('preprocessing/preprocessor.pkl', 'rb') as f:
         preprocessor = pk.load(f)
+
     X_preprocessed = preprocessor.transform(X)
 
-    # Predict #todo: update with actual model
-    with open('model_files/model.pkl', 'rb') as f:
-        model = pk.load(f)
+    # Predict
+    model = load_model("model_files/saved_model/", custom_objects={'activation_function': mapping_to_target_range})
     
     rnn_input_timesteps = 1 # todo: shouldn't be here
-    X_preprocessed = np.reshape(np.array(X_preprocessed), (X_preprocessed.shape[0], rnn_input_timesteps, X_preprocessed.shape[1]))
-    predicted_gate_levels = model.model.predict(X_preprocessed)
+    #X_preprocessed = np.reshape(np.array(X_preprocessed), (X_preprocessed.shape[0], rnn_input_timesteps, X_preprocessed.shape[1]))
+    predicted_gate_levels = model.predict(X_preprocessed)
 
     # Assemble to json file #todo put this in a method
     historical_sub_dict = {}

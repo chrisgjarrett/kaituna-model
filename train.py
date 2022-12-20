@@ -16,12 +16,13 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.compose import ColumnTransformer
 from matplotlib import pyplot as plt
 import seaborn as sns
+from tensorflow import saved_model
 
 from helpers.transfomers import make_leads_transformer
 from helpers.transfomers import make_multistep_target
 from preprocessing import aggregate_hourly_data
 from preprocessing import feature_generator
-from model_files.model_definition import create_rnn, create_ann
+from model_files.model_definition import create_rnn, create_ann, mapping_to_target_range
 from model_files.rnn_helpers import window_reshape_for_rnn
 from helpers.plotting_helpers import visualise_results
 
@@ -35,7 +36,6 @@ GATE_RESOLUTION_LEVEL = 100
 TRAINING_DATA_PATH = "datasets/training_data_artifact.csv"
 MAX_OUTPUT = 1500
 MIN_OUTPUT = 0
-
 
 # Are we training the final model or running cross-validation?
 TRAIN_FINAL_MODEL = True
@@ -180,9 +180,8 @@ if __name__ == "__main__":
         visualise_results(daily_kaituna_data[TARGET_VARIABLE], y_fit, y_pred)
 
         # Save model files
-        with open("model_files/model.pkl","wb") as f:
-            pk.dump(final_model, f)
-
+        final_model.model.save("model_files/saved_model/")
+        
         exit()
 
     # Cross-validation

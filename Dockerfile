@@ -20,7 +20,9 @@ COPY preprocessing/preprocessor.pkl ${LAMBDA_TASK_ROOT}/preprocessing/
 
 # Model files
 RUN mkdir -p ${LAMBDA_TASK_ROOT}/model_files
-COPY model_files/model.pkl ${LAMBDA_TASK_ROOT}/model_files/
+COPY model_files/saved_model ${LAMBDA_TASK_ROOT}/model_files/saved_model/
+COPY model_files/model_definition.py ${LAMBDA_TASK_ROOT}/model_files/model_definition.py
+COPY model_files/rnn_helpers.py ${LAMBDA_TASK_ROOT}/model_files/rnn_helpers.py
 
 # Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
 CMD [ "handle_predictions.handle_predictions" ]

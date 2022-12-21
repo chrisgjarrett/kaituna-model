@@ -34,11 +34,10 @@ def create_rnn(input_shape, output_size, learning_rate=0.05, max_output=1500, mi
     model = keras.Sequential([
         #layers.ConvLSTM1D(filters = 3, kernel_size=3, activation='relu', input_shape=input_shape), 
         #layers.TimeDistributed(layers.Conv1D(filters = 3, kernel_size = 3, input_shape=input_shape), input_shape = input_shape),
-        layers.LSTM(units=10, activation='relu', stateful=False, return_sequences=False, input_shape=input_shape),
-        layers.Dense(units=25, activation='relu'),
+        layers.LSTM(units=7, activation='relu', stateful=False, return_sequences=False, input_shape=input_shape),
         layers.Dropout(0.15),
-        layers.Dense(units=10, activation='relu'),
-        layers.Dense(units=output_size, activation=lambda x: mapping_to_target_range(x, target_max=max_output, target_min=min_output)),
+        layers.Dense(units=output_size),
+        layers.Lambda(lambda x: mapping_to_target_range(x, target_max=max_output, target_min=min_output)),
         ])
 
     model.compile(

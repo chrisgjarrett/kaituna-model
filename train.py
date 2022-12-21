@@ -113,13 +113,12 @@ if __name__ == "__main__":
     training_data_df.to_csv(TRAINING_DATA_PATH)
     
     # Construct model
-    n_epochs = 1000
-    learning_rate = 0.01
+    n_epochs = 2000
+    learning_rate = 0.1
     patience = n_epochs // 5
     min_delta = 1
-    n_timesteps = 1
-    batch_size = X_train_df.shape[0] #- n_timesteps # Play with this
-    #batch_size = 128 # Play with this
+    n_timesteps = 7
+    batch_size = X_train_df.shape[0] - n_timesteps # Play with this
     n_hidden_layers = 1
     lstm_units = {"layer1":50}
        
@@ -132,8 +131,8 @@ if __name__ == "__main__":
 
 #input_shape=(n_steps, 1, n_length, n_features)
     wrapped_model = KerasRegressor(
-            create_ann,
-            input_shape=(X_train_df.shape[1],),
+            create_rnn,
+            input_shape=(n_timesteps, X_train_df.shape[1]),
             output_size=y_train_df.shape[1],
             learning_rate=learning_rate,
             max_output = MAX_OUTPUT,
@@ -147,12 +146,12 @@ if __name__ == "__main__":
     # Reshape for RNN
     # Window the data into lstm form
     ctr = 0
-    X_train_df_rnn = window_reshape_for_rnn(X_train_df, n_timesteps)
-    X_test_df_rnn = window_reshape_for_rnn(X_test_df, n_timesteps)
+    X_train_df = window_reshape_for_rnn(X_train_df, n_timesteps)
+    X_test_df = window_reshape_for_rnn(X_test_df, n_timesteps)
 
     # Align the X and y
-    #y_train_df = y_train_df.iloc[n_timesteps:,:]
-    #y_test_df = y_test_df.iloc[n_timesteps:,:]
+    y_train_df = y_train_df.iloc[n_timesteps:,:]
+    y_test_df = y_test_df.iloc[n_timesteps:,:]
 
     # If we want to just train the model, rather than perform cross-validation
     if (TRAIN_FINAL_MODEL == True):
@@ -174,8 +173,8 @@ if __name__ == "__main__":
         plt.legend(['train', 'val'], loc='upper left')
         plt.show(block=False)
 
-        y_fit = pd.DataFrame(final_model.model.predict(X_train_df), index=X_train_df.index, columns=y_train_df.columns)
-        y_pred = pd.DataFrame(final_model.model.predict(X_test_df), index=X_test_df.index, columns=y_test_df.columns)
+        y_fit = pd.DataFrame(final_model.model.predict(X_train_df), index=y_train_df.index, columns=y_train_df.columns)
+        y_pred = pd.DataFrame(final_model.model.predict(X_test_df), index=y_test_df.index, columns=y_test_df.columns)
 
         visualise_results(daily_kaituna_data[TARGET_VARIABLE], y_fit, y_pred)
 

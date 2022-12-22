@@ -32,10 +32,11 @@ def create_ann(input_shape, output_size, learning_rate=0.01,  max_output=1500, m
 def create_rnn(input_shape, output_size, learning_rate=0.05, max_output=1500, min_output=0):
 
     model = keras.Sequential([
-        #layers.ConvLSTM1D(filters = 3, kernel_size=3, activation='relu', input_shape=input_shape), 
-        #layers.TimeDistributed(layers.Conv1D(filters = 3, kernel_size = 3, input_shape=input_shape), input_shape = input_shape),
-        layers.LSTM(units=7, activation='relu', stateful=False, return_sequences=False, input_shape=input_shape),
-        layers.Dropout(0.15),
+        #layers.Conv1D(filters = 3, kernel_size=3, activation='relu', input_shape=input_shape), 
+        #layers.TimeDistributed(layers.Conv1D(filters = 3, kernel_size = 3), input_shape = input_shape),
+        layers.LSTM(units=7, activation='relu', stateful=False, return_sequences=True, input_shape=input_shape),
+        layers.LSTM(units=3, activation='relu', stateful=False, return_sequences=False),
+        layers.BatchNormalization(),
         layers.Dense(units=output_size),
         layers.Lambda(lambda x: mapping_to_target_range(x, target_max=max_output, target_min=min_output)),
         ])

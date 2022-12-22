@@ -106,19 +106,19 @@ if __name__ == "__main__":
     y, X = y.align(X_features, join='inner', axis=0)
 
     # Split into test and train/validation
-    X_train_df, X_test_df, y_train_df, y_test_df = train_test_split(X, y, test_size=0.20, shuffle=False)
+    X_train_df, X_test_df, y_train_df, y_test_df = train_test_split(X, y, test_size=0.05, shuffle=False)
 
     # Save dataframe to file for artifact logging
     training_data_df = pd.concat([X_train_df, y_train_df], axis=1)
     training_data_df.to_csv(TRAINING_DATA_PATH)
     
     # Construct model
-    n_epochs = 2000
+    n_epochs = 5000
     learning_rate = 0.1
     patience = n_epochs // 5
     min_delta = 1
-    n_timesteps = 7
-    batch_size = X_train_df.shape[0] - n_timesteps # Play with this
+    n_timesteps = 3
+    batch_size = X_train_df.shape[0] #- n_timesteps # Play with this
     n_hidden_layers = 1
     lstm_units = {"layer1":50}
        
@@ -131,8 +131,8 @@ if __name__ == "__main__":
 
 #input_shape=(n_steps, 1, n_length, n_features)
     wrapped_model = KerasRegressor(
-            create_rnn,
-            input_shape=(n_timesteps, X_train_df.shape[1]),
+            create_ann,
+            input_shape=(X_train_df.shape[1],),
             output_size=y_train_df.shape[1],
             learning_rate=learning_rate,
             max_output = MAX_OUTPUT,
@@ -143,23 +143,25 @@ if __name__ == "__main__":
             verbose=True, #state_reset_callback
         )
 
+    X_train = X_train_df
+    X_test = X_test_df
     # Reshape for RNN
     # Window the data into lstm form
     ctr = 0
-    X_train_df = window_reshape_for_rnn(X_train_df, n_timesteps)
-    X_test_df = window_reshape_for_rnn(X_test_df, n_timesteps)
+    #X_train = window_reshape_for_rnn(X_train_df, n_timesteps)
+    #X_test = window_reshape_for_rnn(X_test_df, n_timesteps)
 
-    # Align the X and y
-    y_train_df = y_train_df.iloc[n_timesteps:,:]
-    y_test_df = y_test_df.iloc[n_timesteps:,:]
+    # Align the X and y. TODO: Index by what values were kept in X_train_, somehow
+    #y_train_df = y_train_df.iloc[n_timesteps:,:]
+    #y_test_df = y_test_df.iloc[n_timesteps:,:]
 
     # If we want to just train the model, rather than perform cross-validation
     if (TRAIN_FINAL_MODEL == True):
 
         final_model = wrapped_model.fit(
-            X_train_df,
+            X_train,
             y_train_df,
-            validation_data=(X_test_df, y_test_df),
+            validation_data=(X_test, y_test_df),
             callbacks=[early_stopping],
             epochs=n_epochs)
         
@@ -173,8 +175,8 @@ if __name__ == "__main__":
         plt.legend(['train', 'val'], loc='upper left')
         plt.show(block=False)
 
-        y_fit = pd.DataFrame(final_model.model.predict(X_train_df), index=y_train_df.index, columns=y_train_df.columns)
-        y_pred = pd.DataFrame(final_model.model.predict(X_test_df), index=y_test_df.index, columns=y_test_df.columns)
+        y_fit = pd.DataFrame(final_model.model.predict(X_train), index=y_train_df.index, columns=y_train_df.columns)
+        y_pred = pd.DataFrame(final_model.model.predict(X_test), index=y_test_df.index, columns=y_test_df.columns)
 
         visualise_results(daily_kaituna_data[TARGET_VARIABLE], y_fit, y_pred)
 

@@ -60,7 +60,7 @@ def handle_predictions(event, context):
     # Predict
     model = load_model("model_files/saved_model/", custom_objects={'activation_function': mapping_to_target_range})
     
-    rnn_input_timesteps = 1 # todo: shouldn't be here
+    #rnn_input_timesteps = 1 # todo: shouldn't be here
     #X_preprocessed = np.reshape(np.array(X_preprocessed), (X_preprocessed.shape[0], rnn_input_timesteps, X_preprocessed.shape[1]))
     predicted_gate_levels = model.predict(X_preprocessed)
 

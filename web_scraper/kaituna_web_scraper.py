@@ -74,4 +74,6 @@ def collate_kaituna_data(start_date, end_date):
     # Sort by timestamp descending
     df_river_data = df_river_data.sort_values('TimeStamp')
 
+    df_river_data = df_river_data.astype(float)
+
     return df_river_data

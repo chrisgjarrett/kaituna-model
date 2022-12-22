@@ -16,9 +16,9 @@ def feature_generator(X_input, target_variable):
 
     # Todo - add this to a config file to share with predictor
     features_of_interest = [
-       # "Rainfall_lead_1",
-        #"Rainfall_lead_2",
-        #"Rainfall_lead_3",
+        "Rainfall_lead_1",
+        "Rainfall_lead_2",
+        "Rainfall_lead_3",
         "Rainfall",
         "LakeLevel",
         target_variable

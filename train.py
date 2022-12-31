@@ -10,13 +10,14 @@ import pickle as pk
 import mlflow
 import mlflow.sklearn
 from keras.callbacks import EarlyStopping
-from sklearn.model_selection import TimeSeriesSplit
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import TimeSeriesSplit, cross_val_score
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.compose import ColumnTransformer
 from matplotlib import pyplot as plt
 import seaborn as sns
 from tensorflow import saved_model
+from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import LinearRegression
 
 from helpers.transfomers import make_leads_transformer
 from helpers.transfomers import make_multistep_target
@@ -25,6 +26,53 @@ from preprocessing import feature_generator
 from model_files.model_definition import create_rnn, create_ann, mapping_to_target_range
 from model_files.rnn_helpers import window_reshape_for_rnn
 from helpers.plotting_helpers import visualise_results
+
+
+# A class for boosted hybrid modelling
+class BoostedHybrid:
+    def __init__(self, model_1, model_2):
+        self.model_1 = model_1
+        self.model_2 = model_2
+        self.y_columns = None  # store column names from fit method
+        
+    def fit(self, X_1, X_2, y):
+        # YOUR CODE HERE: fit self.model_1
+        self.model_1.fit(X_1, y)
+
+        y_fit = pd.DataFrame(
+            # YOUR CODE HERE: make predictions with self.model_1
+            self.model_1.predict(X_1),
+            index=X_1.index, columns=y.columns,
+        )
+
+        # YOUR CODE HERE: compute residuals
+        y_resid = y-y_fit
+        y_resid = y_resid.stack().squeeze() # wide to long
+
+        # YOUR CODE HERE: fit self.model_2 on residuals
+        self.model_2.fit(X_2, y_resid)
+
+        # Save column names for predict method
+        self.y_columns = y.columns
+        
+        # Save data for question checking
+        self.y_fit = y_fit
+        self.y_resid = y_resid
+
+
+    def predict(self, X_1, X_2):
+        y_pred = pd.DataFrame(
+            # YOUR CODE HERE: predict with self.model_1
+            self.model_1.predict(X_1),
+            index=X_1.index, columns=self.y_columns,
+        )
+        y_pred = y_pred.stack().squeeze()  # wide to long
+
+        # YOUR CODE HERE: add self.model_2 predictions to y_pred
+        y_pred += self.model_2.predict(X_2)
+
+        return y_pred.unstack()  # long to wide
+
 
 # Configure logging
 logging.basicConfig(level=logging.WARN)
@@ -106,19 +154,19 @@ if __name__ == "__main__":
     y, X = y.align(X_features, join='inner', axis=0)
 
     # Split into test and train/validation
-    X_train_df, X_test_df, y_train_df, y_test_df = train_test_split(X, y, test_size=0.05, shuffle=False)
+    X_train_df, X_test_df, y_train_df, y_test_df = train_test_split(X, y, test_size=0.33, shuffle=False)
 
     # Save dataframe to file for artifact logging
     training_data_df = pd.concat([X_train_df, y_train_df], axis=1)
     training_data_df.to_csv(TRAINING_DATA_PATH)
     
     # Construct model
-    n_epochs = 5000
-    learning_rate = 0.1
+    n_epochs = 10000
+    learning_rate = 0.0001
     patience = n_epochs // 5
     min_delta = 1
-    n_timesteps = 3
-    batch_size = X_train_df.shape[0] #- n_timesteps # Play with this
+    n_timesteps = 1
+    batch_size = X_train_df.shape[0] - n_timesteps # Play with this
     n_hidden_layers = 1
     lstm_units = {"layer1":50}
        
@@ -131,8 +179,8 @@ if __name__ == "__main__":
 
 #input_shape=(n_steps, 1, n_length, n_features)
     wrapped_model = KerasRegressor(
-            create_ann,
-            input_shape=(X_train_df.shape[1],),
+            create_rnn,
+            input_shape=(n_timesteps + DAYS_TO_PREDICT, X_train_df.shape[1],),
             output_size=y_train_df.shape[1],
             learning_rate=learning_rate,
             max_output = MAX_OUTPUT,
@@ -145,19 +193,22 @@ if __name__ == "__main__":
 
     X_train = X_train_df
     X_test = X_test_df
+
     # Reshape for RNN
     # Window the data into lstm form
     ctr = 0
-    #X_train = window_reshape_for_rnn(X_train_df, n_timesteps)
-    #X_test = window_reshape_for_rnn(X_test_df, n_timesteps)
+    X_train = window_reshape_for_rnn(X_train_df, n_timesteps, DAYS_TO_PREDICT)
+    X_test = window_reshape_for_rnn(X_test_df, n_timesteps, DAYS_TO_PREDICT)
+    # X_train = X_train_df
+    # X_test = X_test_df
 
     # Align the X and y. TODO: Index by what values were kept in X_train_, somehow
-    #y_train_df = y_train_df.iloc[n_timesteps:,:]
-    #y_test_df = y_test_df.iloc[n_timesteps:,:]
+    y_train_df = y_train_df.iloc[n_timesteps:-DAYS_TO_PREDICT,:]
+    y_test_df = y_test_df.iloc[n_timesteps:-DAYS_TO_PREDICT,:]
 
     # If we want to just train the model, rather than perform cross-validation
     if (TRAIN_FINAL_MODEL == True):
-
+        
         final_model = wrapped_model.fit(
             X_train,
             y_train_df,
@@ -183,6 +234,8 @@ if __name__ == "__main__":
         # Save model files
         final_model.model.save("model_files/saved_model/")
         
+        input("Press enter to exit")
+
         exit()
 
     # Cross-validation
@@ -198,11 +251,11 @@ if __name__ == "__main__":
         tscv = TimeSeriesSplit(gap=0, max_train_size=None, n_splits=n_splits)
         scores = cross_val_score(
             wrapped_model,
-            X_train_df_rnn,
+            X_train_df,
             y_train_df,
             cv=tscv,
             scoring='neg_mean_squared_error',
-            fit_params={'validation_data':(X_test_df_rnn, y_test_df)}
+            fit_params={'validation_data':(X_test, y_test_df)}
         )
 
         scores = np.sqrt(-scores)

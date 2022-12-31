@@ -37,7 +37,7 @@ def feature_generator(X_input, target_variable):
         #"Rainfall_lead_3",
         "Rainfall",
         "LakeLevel",
-        #target_variable,
+        target_variable,
         ]
     
     # Add seasonal feature columns    
@@ -60,7 +60,7 @@ def feature_generator(X_input, target_variable):
     # Bundle preprocessing for all data
     preprocessor = ColumnTransformer(
         transformers=[
-            #('num', pca_pipeline, ["Rainfall", "LakeLevel"]),
+            ('num', pca_pipeline, ["Rainfall", "LakeLevel"]),
             ('standardiser', standardiser_pipeline, features_of_interest)
         ], 
         remainder = 'passthrough')

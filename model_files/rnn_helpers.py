@@ -12,6 +12,6 @@ def window_reshape_for_rnn(X_orig, n_timesteps, forecast_horizon):
             if (X_orig.columns[feature_id] == 0):
                 X[sample_id,n_timesteps:, feature_id] = X_orig.iloc[sample_id:sample_id+3,feature_id]
             else:
-                X[sample_id,n_timesteps:, feature_id] = 0
+                X[sample_id,n_timesteps:, feature_id] = np.nan
 
-    return X[n_timesteps:-forecast_horizon,:,:]
+    return X[n_timesteps:,:,:]

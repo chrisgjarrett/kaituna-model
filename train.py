@@ -199,8 +199,6 @@ if __name__ == "__main__":
     ctr = 0
     X_train = window_reshape_for_rnn(X_train_df, n_timesteps, DAYS_TO_PREDICT)
     X_test = window_reshape_for_rnn(X_test_df, n_timesteps, DAYS_TO_PREDICT)
-    # X_train = X_train_df
-    # X_test = X_test_df
 
     # Align the X and y. TODO: Index by what values were kept in X_train_, somehow
     y_train_df = y_train_df.iloc[n_timesteps:-DAYS_TO_PREDICT,:]

@@ -66,7 +66,7 @@ def feature_generator(X_input, target_variable):
         remainder = 'passthrough')
 
     # Fit the preprocessor
-    X_preprocessed = pd.DataFrame(data=preprocessor.fit_transform(X), index=X.index)
+    X_preprocessed = pd.DataFrame(data=preprocessor.fit_transform(X), index=X.index, columns=["PCA1", "PCA2", "Rainfall", "LakeLevel", "AverageGate", "Seasonal1","Seasonal2"])
 
     # Export trained preprocessor
     with open("preprocessing/preprocessor.pkl","wb") as f:

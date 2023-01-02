@@ -6,7 +6,6 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 import warnings
 import logging
-import pickle as pk
 import mlflow
 import mlflow.sklearn
 from keras.callbacks import EarlyStopping
@@ -14,82 +13,29 @@ from sklearn.model_selection import TimeSeriesSplit, cross_val_score
 from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.compose import ColumnTransformer
 from matplotlib import pyplot as plt
-import seaborn as sns
-from tensorflow import saved_model
-from sklearn.model_selection import GridSearchCV
-from sklearn.linear_model import LinearRegression
 
 from helpers.transfomers import make_leads_transformer
 from helpers.transfomers import make_multistep_target
 from preprocessing import aggregate_hourly_data
 from preprocessing import feature_generator
-from model_files.model_definition import create_rnn, create_ann, mapping_to_target_range
+from model_files.model_definition import create_rnn
 from model_files.rnn_helpers import window_reshape_for_rnn
 from helpers.plotting_helpers import visualise_results
 
-
-# A class for boosted hybrid modelling
-class BoostedHybrid:
-    def __init__(self, model_1, model_2):
-        self.model_1 = model_1
-        self.model_2 = model_2
-        self.y_columns = None  # store column names from fit method
-        
-    def fit(self, X_1, X_2, y):
-        # YOUR CODE HERE: fit self.model_1
-        self.model_1.fit(X_1, y)
-
-        y_fit = pd.DataFrame(
-            # YOUR CODE HERE: make predictions with self.model_1
-            self.model_1.predict(X_1),
-            index=X_1.index, columns=y.columns,
-        )
-
-        # YOUR CODE HERE: compute residuals
-        y_resid = y-y_fit
-        y_resid = y_resid.stack().squeeze() # wide to long
-
-        # YOUR CODE HERE: fit self.model_2 on residuals
-        self.model_2.fit(X_2, y_resid)
-
-        # Save column names for predict method
-        self.y_columns = y.columns
-        
-        # Save data for question checking
-        self.y_fit = y_fit
-        self.y_resid = y_resid
-
-
-    def predict(self, X_1, X_2):
-        y_pred = pd.DataFrame(
-            # YOUR CODE HERE: predict with self.model_1
-            self.model_1.predict(X_1),
-            index=X_1.index, columns=self.y_columns,
-        )
-        y_pred = y_pred.stack().squeeze()  # wide to long
-
-        # YOUR CODE HERE: add self.model_2 predictions to y_pred
-        y_pred += self.model_2.predict(X_2)
-
-        return y_pred.unstack()  # long to wide
-
-
-# Configure logging
-logging.basicConfig(level=logging.WARN)
-logger = logging.getLogger(__name__)
-
+# Constants
 DAYS_TO_PREDICT = 3
 TARGET_VARIABLE = "AverageGate"
 GATE_RESOLUTION_LEVEL = 100
 TRAINING_DATA_PATH = "datasets/training_data_artifact.csv"
 MAX_OUTPUT = 1500
 MIN_OUTPUT = 0
+N_TRIALS = 5 # Number of times to cross-validate
 
 # Are we training the final model or running cross-validation?
-TRAIN_FINAL_MODEL = True
+TRAIN_FINAL_MODEL = False
 
 # Experiment name
-experiment_name = 'CNN-RNN hybrid'
+experiment_name = 'Model selection'
 
 # Load data
 if __name__ == "__main__":
@@ -101,55 +47,16 @@ if __name__ == "__main__":
     hourly_kaituna_data["TimeStamp"] = pd.to_datetime(hourly_kaituna_data['TimeStamp'], utc=True)
     hourly_kaituna_data = hourly_kaituna_data.set_index("TimeStamp")
 
-    # Convert to daily
+    # Convert to daily summaries
     daily_kaituna_data = aggregate_hourly_data.aggregate_hourly_data(hourly_kaituna_data)
 
-    # Days to look back
-    n_target_lags = 1
-    n_rainfall_lags = 1 
-    n_lake_level_lags = 1
-    n_rainfall_leads = 3 
-
-    # Bundle preprocessing for data.
-    lag_generator = ColumnTransformer(
-        transformers=[
-            #("target_lags", make_lags_transformer(n_target_lags), [target_variable]),
-            #("rainfall_lags", make_lags_transformer(n_rainfall_lags), ["Rainfall"]),
-            #("lakelevel_lags", make_lags_transformer(n_lake_level_lags), ["LakeLevel"]),
-            ("rainfall_leads", make_leads_transformer(n_rainfall_leads), ["Rainfall"]),
-        ],
-        remainder='passthrough'
-    )
-
-    lead_lag_columns = [
-        #"Target_lag",
-        #"Rainfall_lag",
-        #"LakeLevel_lag",
-        "Rainfall_lead_1",
-        "Rainfall_lead_2",
-        "Rainfall_lead_3",
-        ]
-
-    # Select data for model fitting
-    X_cols_to_lag = daily_kaituna_data[["Rainfall"]]
-
-    # Create lags
-    X_lead_lags = pd.DataFrame(lag_generator.fit_transform(X_cols_to_lag),
-                        index = daily_kaituna_data.index,
-                        columns=lead_lag_columns)
-
-    X_raw = pd.merge(X_lead_lags, daily_kaituna_data, left_index=True, right_index=True)
-
-    # Generate feature set
-    X_features = feature_generator.feature_generator(X_raw, TARGET_VARIABLE)
+    # Preprocessing data to create features
+    X_features = feature_generator.feature_generator(daily_kaituna_data, TARGET_VARIABLE)
     
     # Create target variable
-    if (DAYS_TO_PREDICT == 1):
-        y = pd.DataFrame(daily_kaituna_data[TARGET_VARIABLE])
-    else:
-        y = make_multistep_target(daily_kaituna_data[TARGET_VARIABLE], DAYS_TO_PREDICT) 
+    y = make_multistep_target(daily_kaituna_data[TARGET_VARIABLE], DAYS_TO_PREDICT) 
 
-    # Drop columns with missing values    
+    # Drop columns with missing values from shifting    
     y = y.dropna()
     y, X = y.align(X_features, join='inner', axis=0)
 
@@ -161,15 +68,14 @@ if __name__ == "__main__":
     training_data_df.to_csv(TRAINING_DATA_PATH)
     
     # Construct model
-    n_epochs = 1000
-    learning_rate = 0.00001
+    n_epochs = 2000
+    learning_rate = 0.1
     patience = n_epochs // 5
     min_delta = 1
     n_timesteps = 1
-    batch_size = X_train_df.shape[0] - n_timesteps # Play with this
-    n_hidden_layers = 1
-    lstm_units = {"layer1":50}
-       
+    batch_size = X_train_df.shape[0] - n_timesteps
+    
+    # Configure early stopping criteria
     early_stopping = EarlyStopping(
         min_delta=min_delta, # minimium amount of change to count as an improvement
         patience=patience, # how many epochs to wait before stopping
@@ -177,7 +83,7 @@ if __name__ == "__main__":
         monitor='loss'
     )
 
-#input_shape=(n_steps, 1, n_length, n_features)
+    # Create model
     wrapped_model = KerasRegressor(
             create_rnn,
             input_shape=(n_timesteps + DAYS_TO_PREDICT, X_train_df.shape[1],),
@@ -188,19 +94,15 @@ if __name__ == "__main__":
             epochs=n_epochs,
             batch_size=batch_size,
             callbacks=[early_stopping],
-            verbose=True, #state_reset_callback
+            verbose=True,
         )
 
-    X_train = X_train_df
-    X_test = X_test_df
-
-    # Reshape for RNN
-    # Window the data into lstm form
+    # Reshape for lstm
     ctr = 0
     X_train = window_reshape_for_rnn(X_train_df, n_timesteps, DAYS_TO_PREDICT)
     X_test = window_reshape_for_rnn(X_test_df, n_timesteps, DAYS_TO_PREDICT)
 
-    # Align the X and y. TODO: Index by what values were kept in X_train_, somehow
+    # Align the X and y.
     y_train_df = y_train_df.iloc[n_timesteps:-DAYS_TO_PREDICT,:]
     y_test_df = y_test_df.iloc[n_timesteps:-DAYS_TO_PREDICT,:]
 
@@ -236,48 +138,46 @@ if __name__ == "__main__":
 
         exit()
 
-    # Cross-validation
-    #todo run this multiple times and do statistics
-    # to try: lstm complexities, hybrid cnn, hybrid with dense
-    mlflow.set_experiment(experiment_name)
-
-    # Start experiment
-    with mlflow.start_run():    
-
-        # Cross validation
-        n_splits=5
-        tscv = TimeSeriesSplit(gap=0, max_train_size=None, n_splits=n_splits)
-        scores = cross_val_score(
-            wrapped_model,
-            X_train_df,
-            y_train_df,
-            cv=tscv,
-            scoring='neg_mean_squared_error',
-            fit_params={'validation_data':(X_test, y_test_df)}
-        )
-
-        scores = np.sqrt(-scores)
-
-        # Logging metrics
-        for idx, score in enumerate(scores):
-            mlflow.log_metric("cross_val_rmse".join(["_", str(idx)]), score)
+    for i in range(N_TRIALS):
         
-        mlflow.log_metric("median_score", np.median(scores))
+        # Cross-validation
+        mlflow.set_experiment(experiment_name)
 
-        mlflow.log_param("n_epochs", n_epochs)
-        mlflow.log_param("learning_rate", learning_rate)
-        mlflow.log_param("early_stopping_patience", patience)
-        mlflow.log_param("early_stopping_min_delta", min_delta)
-        mlflow.log_param('time_steps',n_timesteps)
-        mlflow.log_param('stateful', False)
-        mlflow.log_param("n_hidden_layers", n_hidden_layers)
-        mlflow.log_param("units", lstm_units)
-        mlflow.log_param("batch_size", batch_size)
+        # Start experiment
+        with mlflow.start_run():    
 
-        # Save model and data set
-        mlflow.sklearn.log_model(
-        sk_model=wrapped_model,
-        artifact_path="model",
-        )
+            # Cross validation
+            n_splits=5
+            tscv = TimeSeriesSplit(gap=0, max_train_size=None, n_splits=n_splits)
+            scores = cross_val_score(
+                wrapped_model,
+                X_train,
+                y_train_df,
+                cv=tscv,
+                scoring='neg_mean_squared_error',
+                fit_params={'validation_data':(X_test, y_test_df)}
+            )
 
-        mlflow.log_artifacts('datasets', TRAINING_DATA_PATH)
+            # Get RMSE
+            scores = np.sqrt(-scores)
+
+            # Logging metrics
+            for idx, score in enumerate(scores):
+                mlflow.log_metric("cross_val_rmse".join(["_", str(idx)]), score)
+            
+            mlflow.log_metric("median_score", np.median(scores))
+
+            mlflow.log_param("n_epochs", n_epochs)
+            mlflow.log_param("learning_rate", learning_rate)
+            mlflow.log_param("early_stopping_patience", patience)
+            mlflow.log_param("early_stopping_min_delta", min_delta)
+            mlflow.log_param('time_steps',n_timesteps)
+            mlflow.log_param("batch_size", batch_size)
+
+            # Save model and data set
+            mlflow.sklearn.log_model(
+            sk_model=wrapped_model,
+            artifact_path="model",
+            )
+
+            mlflow.log_artifacts('datasets', TRAINING_DATA_PATH)

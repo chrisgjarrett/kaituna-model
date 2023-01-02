@@ -16,7 +16,6 @@ def feature_generator(X_input, target_variable):
 
     # Preprocessing
     # Seasonal features. 'fourier' for La nina/el nino and 'calendar_fourier' for the annual cycle
-    calendar_fourier = CalendarFourier(freq="A", order=1)
     fourier = Fourier(period=APPROX_MULTIYEAR_CYCLE_PERIOD, order=1)
 
     # Features creation
@@ -30,11 +29,8 @@ def feature_generator(X_input, target_variable):
 
     X_seasonal_indicators = dp.in_sample()
 
-    # Todo - add this to a config file to share with predictor
+    # Features of interest
     features_of_interest = [
-        #"Rainfall_lead_1",
-        #"Rainfall_lead_2",
-        #"Rainfall_lead_3",
         "Rainfall",
         "LakeLevel",
         target_variable,

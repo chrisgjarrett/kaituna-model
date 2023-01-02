@@ -34,6 +34,7 @@ def create_rnn(input_shape, output_size, learning_rate=0.05, max_output=1500, mi
     model = keras.Sequential([
         #layers.Conv1D(filters = 32, kernel_size=3, activation='relu', input_shape=input_shape), 
         layers.Bidirectional(layers.LSTM(units=20, activation='relu', stateful=False, return_sequences=True), input_shape=input_shape),
+        #layers.Bidirectional(layers.LSTM(units=20, activation='relu', stateful=False, return_sequences=True)),
         layers.Bidirectional(layers.LSTM(units=10, activation='relu', stateful=False, return_sequences=True)),
         layers.Bidirectional(layers.LSTM(units=5, activation='relu', stateful=False, return_sequences=False)),
         layers.Dropout(0.15),

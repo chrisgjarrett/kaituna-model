@@ -5,16 +5,13 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 import numpy as np
 import warnings
-import logging
 import mlflow
 import mlflow.sklearn
 from keras.callbacks import EarlyStopping
 from sklearn.model_selection import TimeSeriesSplit, cross_val_score
 from keras.wrappers.scikit_learn import KerasRegressor
-from sklearn.compose import ColumnTransformer
 from matplotlib import pyplot as plt
 
-from helpers.transfomers import make_leads_transformer
 from helpers.transfomers import make_multistep_target
 from preprocessing import aggregate_hourly_data
 from preprocessing import feature_generator
@@ -35,7 +32,7 @@ N_TRIALS = 5 # Number of times to cross-validate
 TRAIN_FINAL_MODEL = False
 
 # Experiment name
-experiment_name = 'Model selection'
+experiment_name = '2 layers, learning rate'
 
 # Load data
 if __name__ == "__main__":
@@ -69,7 +66,7 @@ if __name__ == "__main__":
     
     # Construct model
     n_epochs = 2000
-    learning_rate = 0.1
+    learning_rate = 0.0001
     patience = n_epochs // 5
     min_delta = 1
     n_timesteps = 1

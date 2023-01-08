@@ -1,0 +1,4 @@
+artifact_location: file:///Users/chrisjarrett/Documents/Personal/kaituna-timeseries-project/kaituna-model/mlruns/8
+experiment_id: '8'
+lifecycle_stage: active
+name: 1 layer

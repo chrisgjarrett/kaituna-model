@@ -1,0 +1,4 @@
+artifact_location: file:///Users/chrisjarrett/Documents/Personal/kaituna-timeseries-project/kaituna-model/mlruns/5
+experiment_id: '5'
+lifecycle_stage: active
+name: 3 layers Model selection

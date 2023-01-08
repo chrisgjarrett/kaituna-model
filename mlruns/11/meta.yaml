@@ -1,0 +1,4 @@
+artifact_location: file:///Users/chrisjarrett/Documents/Personal/kaituna-timeseries-project/kaituna-model/mlruns/11
+experiment_id: '11'
+lifecycle_stage: active
+name: 2 layers, learning rate
